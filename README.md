@@ -210,8 +210,8 @@ recall-os/
 
 ## Related Components
 
-- [Project Intuitus Core](../intuitus-core/) — Main architecture and coordination
-- [Simulated Intuition](../simulated-intuition/) — Predictive decision engine
+- Project Intuitus Core `[Private]`
+- Simulated Intuition `[Private]`
 - Logos Language — `[Private]`
 
 ---
