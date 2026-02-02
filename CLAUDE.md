@@ -2,106 +2,23 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## Related Documentation
-
-- **PROJECT_ROADMAP.md** - Detailed status, remaining tasks, and implementation phases
-- **CLAUDE.md** - This file (technical architecture and commands)
-
----
-
-## Project Status (Updated: 2026-02-01)
-
-### ✅ COMPLETED
-
-**Core Infrastructure**
-- [x] Tauri v2 project with React 19 frontend
-- [x] TanStack Query v5 for state management
-- [x] sqlite-vec extension loading in Rust (`vec0.dll`)
-- [x] Database schema (documents, chunks, chunks_fts, vec_chunks)
-- [x] Database migration system
-- [x] Tauri capabilities/ACL configuration (restricted permissions)
-- [x] FFmpeg bundled as sidecar (`ffmpeg.exe`)
-
-**Ingestion Engine**
-- [x] PDF text extraction with `pdf-extract` crate
-- [x] Windows OCR fallback for scanned PDFs (Windows.Data.Pdf + Windows.Media.Ocr)
-- [x] Character-based chunking (~512 tokens, 50 overlap) with tiktoken
-- [x] Embedding generation with Gemini `text-embedding-004`
-- [x] File watcher for automatic ingestion
-- [x] Ingestion progress events via Tauri
-- [x] Trial mode document limits (25 docs for trial users)
-
-**RAG Pipeline**
-- [x] Gemini API client with rate limiting (leaky bucket)
-- [x] Hybrid retrieval (vector KNN + FTS5 BM25)
-- [x] Reciprocal rank fusion (k=60)
-- [x] Context assembly from top chunks
-- [x] Citation parsing and linking
-- [x] Conversation history support
-- [x] FTS5 query escaping (security fix)
-
-**UI Components**
-- [x] Split-pane layout (Chat + Source Inspector)
-- [x] PDF viewer with page navigation and zoom (`react-pdf`)
-- [x] PDF text highlighting on matched content
-- [x] Tauri asset protocol for local file loading
-- [x] Citation chip components in chat
-- [x] Ingestion progress indicators
-- [x] Dark mode (Tailwind)
-- [x] BYOK API key configuration screen
-- [x] Settings panel with watched folders
-- [x] Custom notification windows (transparent, no shadow, auto-dismiss)
-- [x] Video player with timestamp seeking (`VideoPlayer.tsx`)
-- [x] Audio player with playback controls (`AudioPlayer.tsx`)
-- [x] Chunk text display with page section formatting (`FormattedChunkContent`)
-- [x] License modal with trial usage display (`LicenseModal.tsx`)
-- [x] Secure markdown rendering with react-markdown + rehype-sanitize
-
-**Security (2026-02-01)**
-- [x] XSS vulnerability fixed in ChatPanel.tsx
-- [x] Tauri capabilities restricted (no broad fs/shell permissions)
-- [x] CSP hardened (removed unsafe-eval, external CDNs)
-- [x] FTS5 query injection prevention
-- [x] Exposed .env file deleted
-
-**Monetization (2026-02-01)**
-- [x] License validation system (`src-tauri/src/commands/license.rs`)
-- [x] License key format: `RO-XXXX-XXXX-XXXX`
-- [x] Trial mode with 25 document limit
-- [x] License UI with activation/deactivation
-- [x] Trial usage display in sidebar
-
-### ❌ NOT STARTED
-
-**Advanced Features**
-- [ ] Tiered retrieval (top 10 fast, top 50 deep)
-- [ ] Image file ingestion via Gemini vision
-- [ ] LemonSqueezy integration for license sales
-- [ ] Code signing certificate
-
-### Known Issues
-
-1. **Dev server PATH**: When starting via Claude, need `export PATH="$PATH:/c/Users/USERNAME/.cargo/bin"` before `npm run tauri dev`.
-
----
-
 ## Build & Development Commands
 
 ```bash
 # Install dependencies
-pnpm install
+npm install
 
 # Development (runs both Vite frontend and Tauri backend)
-pnpm tauri dev
+npm run tauri:dev
 
 # Build production Windows installer
-pnpm tauri build
+npm run tauri:build
 
 # Frontend only (for UI development without backend)
-pnpm dev
+npm run dev
 
 # Type check frontend
-pnpm build
+npm run build
 ```
 
 **Required binaries in `src-tauri/resources/`:**
@@ -110,7 +27,7 @@ pnpm build
 
 ## Architecture Overview
 
-RECALL.OS is a Tauri v2 desktop app with a Rust backend and React 19 frontend. It provides local-first document ingestion, hybrid search (vector + FTS), and RAG-powered Q&A.
+RECALL.OS is a Tauri v2 desktop app with a Rust backend and React 19 frontend. It provides local-first document ingestion, hybrid search (vector + FTS), and RAG-powered Q&A using the Gemini API (BYOK model).
 
 ### Frontend-Backend Communication
 
@@ -129,18 +46,12 @@ Backend emits events to frontend via `app_handle.emit()`:
 
 Frontend listens in `App.tsx` via `@tauri-apps/api/event.listen()`.
 
-**Custom Notification System** (`src-tauri/src/notifications/`):
-- Creates transparent, frameless popup windows for related document alerts
-- Uses pull-based data retrieval (window requests data via `notification_window_ready` command)
-- Windows-specific: `shadow(false)` removes border outline on transparent windows
-- Auto-dismisses after 5 seconds with animated progress bar
-
 ### State Management
 
 - **Backend**: `AppState` in `state.rs` holds shared state wrapped in `Arc<RwLock<>>`:
   - `database`, `llm_client`, `ingestion_engine`, `rag_engine`, `settings`, `watcher_manager`
 - **Frontend**: TanStack Query v5 with hooks in `src/hooks/`
-  - Query keys: `["documents"]`, `["stats"]`, `["settings"]`, `["chunks", documentId]`
+  - Query keys: `["documents"]`, `["stats"]`, `["settings"]`, `["chunks", documentId]`, `["license"]`
 
 ### Database Layer
 
@@ -157,7 +68,7 @@ Tables: `documents`, `chunks`, `chunks_fts`, `vec_chunks`, `conversations`, `con
    - Video/Audio: FFmpeg sidecar for frame extraction and audio conversion
    - Images: Gemini vision API for descriptions
 2. **windows_ocr.rs** - Windows.Data.Pdf + Windows.Media.Ocr APIs (no external DLLs)
-3. **chunker.rs** - character-based chunking (~512 tokens, 50 overlap) with lazy-loaded tiktoken tokenizer
+3. **chunker.rs** - token-based chunking (~512 tokens, 50 overlap) with tiktoken
 4. **watcher.rs** / **watcher_manager.rs** - file system watching with auto-ingest
 
 Progress stages: `queued` → `extracting` → `chunking` → `embedding` → `indexing` → `completed`
@@ -168,6 +79,7 @@ Progress stages: `queued` → `extracting` → `chunking` → `embedding` → `i
 2. **HybridRetriever** in `retriever.rs`:
    - Parallel vector search (sqlite-vec KNN) + FTS5 search
    - Reciprocal rank fusion with k=60
+   - FTS5 queries are sanitized to prevent injection
 3. Context assembly from top chunks
 4. LLM generation with conversation history support
 5. Citation extraction from response
@@ -176,15 +88,16 @@ Progress stages: `queued` → `extracting` → `chunking` → `embedding` → `i
 
 - **client.rs** - Gemini API client with resumable file uploads
 - **rate_limiter.rs** - leaky bucket algorithm (60 RPM default)
-- **LlmProvider** trait for future provider flexibility
 
-Models (currently in use):
+Models:
 - `gemini-2.0-flash` - ingestion, transcription, RAG generation
 - `text-embedding-004` - embeddings (768 dimensions)
 
-Note: Plan mentions Gemini 3 models but 2.0-flash is currently implemented. Update when Gemini 3 becomes stable.
+### License System (`src-tauri/src/commands/license.rs`)
 
-API endpoint: `https://generativelanguage.googleapis.com/v1beta/models`
+- License key format: `RO-XXXX-XXXX-XXXX` with checksum validation
+- Trial mode: 25 document limit enforced in `ingestion.rs`
+- License status stored in settings.json
 
 ## Key Tauri Commands
 
@@ -198,14 +111,18 @@ API endpoint: `https://generativelanguage.googleapis.com/v1beta/models`
 
 **Settings**: `get_settings`, `update_settings`, `validate_api_key`
 
+**License**: `get_license_status`, `activate_license`, `deactivate_license`
+
 **Watcher**: `get_watcher_status`, `start_watcher`, `stop_watcher`, `add_watched_folder`, `remove_watched_folder`, `toggle_auto_ingest`
 
 ## Key Patterns
 
 - **Error handling**: `RecallError` enum in `error.rs` implements `Serialize` for Tauri IPC
-- **Tauri permissions**: ACL in `capabilities/default.json`, only allows `generativelanguage.googleapis.com`
+- **Tauri permissions**: ACL in `capabilities/default.json`, restricted to minimal permissions
+- **Network**: Only allows `generativelanguage.googleapis.com` in CSP
 - **Async locks**: Use `parking_lot::RwLock` with short critical sections, clone data before `.await`
 - **Windows-specific**: `#[cfg(windows)]` blocks for Windows OCR in `windows_ocr.rs`
+- **Security**: Markdown rendered with react-markdown + rehype-sanitize to prevent XSS
 
 ## Settings
 
@@ -216,33 +133,10 @@ Stored in `%APPDATA%/com.recallos.app/settings.json`:
 - `embedding_model`, `ingestion_model`, `reasoning_model`
 - `license_key`, `license_activated_at` - license validation
 
-## Quick Start for Development
+## Custom Notification System
 
-```bash
-# 1. Ensure cargo is in PATH (Windows)
-export PATH="$PATH:/c/Users/USERNAME/.cargo/bin"
-
-# 2. Start dev server
-cd C:/Users/USERNAME/Desktop/RECALL.OS
-npm run tauri:dev
-
-# 3. Build production installer
-npm run tauri:build
-```
-
-## Next Session Priority
-
-1. **Test production build**
-   - Close any running dev servers
-   - Run `npm run tauri:build`
-   - Test installer on clean Windows system
-
-2. **Set up monetization**
-   - Create LemonSqueezy account
-   - Configure license key webhook
-   - Optional: purchase code signing certificate
-
-4. **Future enhancements**
-   - Tiered retrieval (top 10 fast, top 50 deep)
-   - Image file ingestion via Gemini vision
-   - Backend API for license validation
+`src-tauri/src/notifications/`:
+- Creates transparent, frameless popup windows for related document alerts
+- Uses pull-based data retrieval (window requests data via `notification_window_ready` command)
+- Windows-specific: `shadow(false)` removes border outline on transparent windows
+- Auto-dismisses after 5 seconds with animated progress bar
