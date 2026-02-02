@@ -97,7 +97,7 @@ npm run tauri:build
 - [x] Production build configuration
 
 ### Pending (User Actions)
-- [ ] Revoke exposed API key at https://aistudio.google.com/apikey
+- [ ] Enable GitHub Pages (Settings > Pages > Deploy from branch main, folder /docs)
 - [ ] Close running dev server and test build
 - [ ] Set up LemonSqueezy account for payments
 - [ ] Purchase code signing certificate (optional)
@@ -186,9 +186,9 @@ npm run build
 ## Next Steps
 
 ### Immediate
-1. **Revoke exposed API key** - CRITICAL security action
-2. **Test production build** - Close dev server, run `npm run tauri:build`
-3. **Set up LemonSqueezy** - For license key sales
+1. **Test production build** - Close dev server, run `npm run tauri:build`
+2. **Set up LemonSqueezy** - For license key sales
+3. **Enable GitHub Pages** - Settings > Pages > Deploy from /docs folder
 
 ### Future Enhancements
 - Tiered retrieval (top 10 fast, top 50 deep)

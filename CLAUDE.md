@@ -83,8 +83,6 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 1. **Dev server PATH**: When starting via Claude, need `export PATH="$PATH:/c/Users/USERNAME/.cargo/bin"` before `npm run tauri dev`.
 
-2. **API Key**: The exposed API key in .env was deleted - user must revoke it at https://aistudio.google.com/apikey
-
 ---
 
 ## Build & Development Commands
