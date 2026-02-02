@@ -9,9 +9,10 @@
 ## Quick Start for New Sessions
 
 ```bash
+# Install dependencies
+npm install
+
 # Start development server
-export PATH="$PATH:/c/Users/USERNAME/.cargo/bin"
-cd C:/Users/USERNAME/Desktop/RECALL.OS
 npm run tauri:dev
 
 # Build production installer
