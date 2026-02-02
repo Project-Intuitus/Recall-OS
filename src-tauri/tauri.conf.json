@@ -1,0 +1,74 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "RECALL.OS",
+  "version": "1.0.0",
+  "identifier": "com.recallos.app",
+  "build": {
+    "beforeDevCommand": "npm run dev",
+    "devUrl": "http://localhost:1420",
+    "beforeBuildCommand": "npm run build",
+    "frontendDist": "../dist"
+  },
+  "app": {
+    "withGlobalTauri": true,
+    "windows": [
+      {
+        "label": "main",
+        "title": "RECALL.OS",
+        "width": 1400,
+        "height": 900,
+        "minWidth": 800,
+        "minHeight": 600,
+        "resizable": true,
+        "fullscreen": false,
+        "maximized": true,
+        "center": true,
+        "decorations": true
+      }
+    ],
+    "security": {
+      "csp": "default-src 'self'; img-src 'self' asset: https://asset.localhost data: blob:; script-src 'self' blob:; style-src 'self' 'unsafe-inline'; connect-src 'self' ipc: http://ipc.localhost; worker-src 'self' blob:; frame-ancestors 'none'; base-uri 'self'",
+      "assetProtocol": {
+        "enable": true,
+        "scope": ["**/*"]
+      }
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": ["nsis"],
+    "icon": [
+      "icons/icon.png",
+      "icons/128x128@2x.png",
+      "icons/128x128.png",
+      "icons/64x64.png",
+      "icons/32x32.png",
+      "icons/icon.icns",
+      "icons/icon.ico"
+    ],
+    "resources": [
+      "resources/vec0.dll",
+      "resources/ffmpeg.exe",
+      "icons/icon.ico",
+      "icons/icon.png"
+    ],
+    "shortDescription": "AI-powered document memory and search",
+    "longDescription": "RECALL.OS is a local-first AI assistant that indexes your documents, videos, and screenshots for intelligent search and question answering.",
+    "copyright": "Copyright 2024 RECALL.OS",
+    "category": "Productivity",
+    "windows": {
+      "certificateThumbprint": null,
+      "digestAlgorithm": "sha256",
+      "timestampUrl": "http://timestamp.digicert.com",
+      "nsis": {
+        "installerIcon": "icons/icon.ico",
+        "headerImage": null,
+        "sidebarImage": null,
+        "installMode": "currentUser",
+        "languages": ["English"],
+        "displayLanguageSelector": false
+      }
+    }
+  },
+  "plugins": {}
+}

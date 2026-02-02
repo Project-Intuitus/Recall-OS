@@ -1,0 +1,4 @@
+# Place vec0.dll and ffmpeg.exe here for development
+# Download from:
+# - sqlite-vec: https://github.com/asg017/sqlite-vec/releases
+# - ffmpeg: https://www.gyan.dev/ffmpeg/builds/

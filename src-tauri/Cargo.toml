@@ -1,0 +1,93 @@
+[package]
+name = "recall-os"
+version = "1.0.0"
+description = "Project Mnemosyne - Local-first AI-powered document retrieval and RAG system"
+authors = ["RECALL.OS Team"]
+edition = "2021"
+rust-version = "1.84"
+
+[lib]
+name = "recall_os_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2.0", features = [] }
+
+[dependencies]
+# Tauri
+tauri = { version = "2.0", features = ["devtools", "protocol-asset", "tray-icon", "image-png"] }
+tauri-plugin-shell = "2.0"
+tauri-plugin-fs = "2.0"
+tauri-plugin-dialog = "2.0"
+tauri-plugin-notification = "2.0"
+tauri-plugin-global-shortcut = "2.2"
+
+# Screen capture
+xcap = "0.0.14"
+
+# Async runtime
+tokio = { version = "1.42", features = ["full"] }
+
+# Database
+rusqlite = { version = "0.32", features = ["bundled", "load_extension"] }
+
+# Serialization
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+
+# HTTP client for Gemini API
+reqwest = { version = "0.12", features = ["json", "multipart", "stream"] }
+
+# PDF extraction
+pdf-extract = "0.7"
+image = "0.25"
+
+# Text processing
+tiktoken-rs = "0.6"
+unicode-segmentation = "1.12"
+
+# Utilities
+thiserror = "2.0"
+anyhow = "1.0"
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+chrono = { version = "0.4", features = ["serde"] }
+uuid = { version = "1.11", features = ["v4", "serde"] }
+base64 = "0.22"
+sha2 = "0.10"
+hex = "0.4"
+futures = "0.3"
+async-trait = "0.1"
+regex = "1.11"
+mime_guess = "2.0"
+parking_lot = "0.12"
+once_cell = "1.20"
+tempfile = "3.14"
+walkdir = "2.5"
+notify = { version = "7.0", default-features = false, features = ["macos_fsevent"] }
+dotenvy = "0.15"
+opener = "0.7"
+scopeguard = "1.2"
+rand = "0.8"
+
+[target.'cfg(windows)'.dependencies]
+windows = { version = "0.58", features = [
+    "Win32_Foundation",
+    "Win32_System_LibraryLoader",
+    "Win32_UI_WindowsAndMessaging",
+    "Media_Ocr",
+    "Graphics_Imaging",
+    "Storage",
+    "Storage_Streams",
+    "Foundation",
+    "Foundation_Collections",
+    "Data_Pdf"
+] }
+# Windows toast notifications with custom AUMID support
+tauri-winrt-notification = "0.7"
+# Windows registry access for AUMID registration
+winreg = "0.55"
+
+[features]
+default = ["custom-protocol"]
+custom-protocol = ["tauri/custom-protocol"]
