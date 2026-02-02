@@ -234,16 +234,12 @@ npm run tauri:build
 
 ## Next Session Priority
 
-1. **CRITICAL: Revoke exposed API key**
-   - Go to https://aistudio.google.com/apikey
-   - Revoke the exposed key `***REDACTED_API_KEY***`
-
-2. **Test production build**
+1. **Test production build**
    - Close any running dev servers
    - Run `npm run tauri:build`
    - Test installer on clean Windows system
 
-3. **Set up monetization**
+2. **Set up monetization**
    - Create LemonSqueezy account
    - Configure license key webhook
    - Optional: purchase code signing certificate
