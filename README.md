@@ -10,7 +10,7 @@
 </p>
 
 <p align="center">
-  <a href="https://project-intuitus.github.io/Recall-OS/">Website</a> •
+  <a href="https://projectintuitus.com">Website</a> •
   <a href="https://github.com/Project-Intuitus/Recall-OS/releases">Download</a> •
   <a href="#installation">Installation</a> •
   <a href="#features">Features</a>
