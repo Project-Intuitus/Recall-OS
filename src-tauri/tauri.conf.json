@@ -27,7 +27,7 @@
       }
     ],
     "security": {
-      "csp": "default-src 'self'; img-src 'self' asset: https://asset.localhost data: blob:; script-src 'self' blob:; style-src 'self' 'unsafe-inline'; connect-src 'self' ipc: http://ipc.localhost; worker-src 'self' blob:; frame-ancestors 'none'; base-uri 'self'",
+      "csp": "default-src 'self'; img-src 'self' asset: https://asset.localhost http://asset.localhost data: blob:; script-src 'self' blob:; style-src 'self' 'unsafe-inline'; connect-src 'self' ipc: http://ipc.localhost asset: https://asset.localhost http://asset.localhost; worker-src 'self' blob:; frame-ancestors 'none'; base-uri 'self'",
       "assetProtocol": {
         "enable": true,
         "scope": ["**/*"]
@@ -52,9 +52,10 @@
       "icons/icon.ico",
       "icons/icon.png"
     ],
+    "publisher": "Project Intuitus",
     "shortDescription": "AI-powered document memory and search",
     "longDescription": "RECALL.OS is a local-first AI assistant that indexes your documents, videos, and screenshots for intelligent search and question answering.",
-    "copyright": "Copyright 2024 RECALL.OS",
+    "copyright": "Copyright 2024-2025 Project Intuitus",
     "category": "Productivity",
     "windows": {
       "certificateThumbprint": null,
@@ -62,8 +63,9 @@
       "timestampUrl": "http://timestamp.digicert.com",
       "nsis": {
         "installerIcon": "icons/icon.ico",
-        "headerImage": null,
-        "sidebarImage": null,
+        "headerImage": "installer/header.bmp",
+        "sidebarImage": "installer/sidebar.bmp",
+        "installerHooks": "installer/hooks.nsh",
         "installMode": "currentUser",
         "languages": ["English"],
         "displayLanguageSelector": false

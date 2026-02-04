@@ -1212,12 +1212,12 @@ pub async fn validate_api_key(api_key: &str) -> Result<bool> {
         contents: vec![GeminiContent {
             role: "user".to_string(),
             parts: vec![GeminiPart::Text {
-                text: "Hi".to_string(),
+                text: "Say hello".to_string(),
             }],
         }],
         system_instruction: None,
         generation_config: Some(GenerationConfig {
-            max_output_tokens: Some(5),
+            max_output_tokens: Some(10),
             ..Default::default()
         }),
     };
@@ -1229,5 +1229,110 @@ pub async fn validate_api_key(api_key: &str) -> Result<bool> {
         .send()
         .await?;
 
-    Ok(response.status().is_success())
+    let status = response.status();
+    let body = response.text().await.unwrap_or_default();
+
+    // Check for HTTP-level errors
+    if !status.is_success() {
+        if status.as_u16() == 401 || status.as_u16() == 403 {
+            return Err(RecallError::InvalidApiKey);
+        }
+        if status.as_u16() == 429 {
+            // Check if it's a quota/billing issue
+            if body.contains("RESOURCE_EXHAUSTED") || body.contains("quota") {
+                return Err(RecallError::LlmApi(
+                    "API quota exceeded. Please enable billing in Google AI Studio or wait for quota reset.".to_string()
+                ));
+            }
+            return Err(RecallError::RateLimit(60));
+        }
+        tracing::error!("API validation failed: {} - {}", status, body);
+        return Err(RecallError::LlmApi(format!("API error {}: {}", status, extract_error_message(&body))));
+    }
+
+    // Check for error field in response body (API can return 200 with error)
+    if let Ok(error_response) = serde_json::from_str::<serde_json::Value>(&body) {
+        if let Some(error) = error_response.get("error") {
+            let error_msg = error.get("message")
+                .and_then(|m| m.as_str())
+                .unwrap_or("Unknown API error");
+            tracing::error!("API returned error in body: {}", error_msg);
+
+            // Check for specific error types
+            if error_msg.contains("billing") || error_msg.contains("quota") || error_msg.contains("RESOURCE_EXHAUSTED") {
+                return Err(RecallError::LlmApi(
+                    "Billing not enabled. Please set up billing in Google AI Studio to use the API.".to_string()
+                ));
+            }
+            if error_msg.contains("not found") || error_msg.contains("does not exist") {
+                return Err(RecallError::LlmApi(
+                    "Model not available. Please ensure gemini-2.0-flash is enabled for your API key.".to_string()
+                ));
+            }
+            return Err(RecallError::LlmApi(error_msg.to_string()));
+        }
+    }
+
+    // Parse as GeminiResponse
+    let parsed: std::result::Result<GeminiResponse, _> = serde_json::from_str(&body);
+
+    match parsed {
+        Ok(resp) => {
+            // Check for empty candidates
+            if resp.candidates.is_empty() {
+                // Check if blocked by safety
+                if let Some(ref feedback) = resp.prompt_feedback {
+                    if let Some(ref reason) = feedback.block_reason {
+                        tracing::error!("API blocked request: {}", reason);
+                        return Err(RecallError::LlmApi(format!("Request blocked: {}", reason)));
+                    }
+                }
+                tracing::error!("API returned empty candidates: {}", body);
+                return Err(RecallError::LlmApi(
+                    "API returned no response. This may indicate a billing or quota issue.".to_string()
+                ));
+            }
+
+            // Verify we actually got text content
+            let has_content = resp.candidates.first()
+                .and_then(|c| c.content.as_ref())
+                .and_then(|content| content.parts.first())
+                .map(|p| match p {
+                    GeminiPart::Text { text } => !text.trim().is_empty(),
+                    _ => false,
+                })
+                .unwrap_or(false);
+
+            if !has_content {
+                tracing::error!("API returned empty text content: {}", body);
+                return Err(RecallError::LlmApi(
+                    "API returned empty response. Please verify your API key has proper permissions.".to_string()
+                ));
+            }
+
+            Ok(true)
+        }
+        Err(e) => {
+            tracing::error!("Failed to parse API response: {} - {}", e, body);
+            Err(RecallError::LlmApi(format!("Invalid API response: {}", extract_error_message(&body))))
+        }
+    }
+}
+
+/// Extract a user-friendly error message from API response body
+fn extract_error_message(body: &str) -> String {
+    // Try to parse as JSON and extract error message
+    if let Ok(json) = serde_json::from_str::<serde_json::Value>(body) {
+        if let Some(error) = json.get("error") {
+            if let Some(msg) = error.get("message").and_then(|m| m.as_str()) {
+                return msg.to_string();
+            }
+        }
+    }
+    // Return truncated body if no structured error
+    if body.len() > 200 {
+        format!("{}...", &body[..200])
+    } else {
+        body.to_string()
+    }
 }

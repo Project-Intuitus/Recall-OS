@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { X, Key, Loader2, CheckCircle, AlertCircle, Shield, ExternalLink } from "lucide-react";
-import { useLicenseStatus, useActivateLicense, useDeactivateLicense } from "../hooks/useLicense";
+import { useLicenseStatus, useActivateLicense, useDeactivateLicense, useActivateTestLicense } from "../hooks/useLicense";
 import clsx from "clsx";
 
 interface LicenseModalProps {
@@ -11,9 +11,13 @@ export default function LicenseModal({ onClose }: LicenseModalProps) {
   const { data: licenseStatus, isLoading } = useLicenseStatus();
   const activateLicense = useActivateLicense();
   const deactivateLicense = useDeactivateLicense();
+  const activateTestLicense = useActivateTestLicense();
 
   const [licenseKey, setLicenseKey] = useState("");
   const [showDeactivateConfirm, setShowDeactivateConfirm] = useState(false);
+
+  // Check if running in dev mode (Vite sets this)
+  const isDev = import.meta.env.DEV;
 
   const handleActivate = async () => {
     if (!licenseKey.trim()) return;
@@ -35,48 +39,26 @@ export default function LicenseModal({ onClose }: LicenseModalProps) {
     }
   };
 
-  const formatLicenseKey = (value: string) => {
-    // Auto-format as RO-XXXX-XXXX-XXXX
-    const cleaned = value.toUpperCase().replace(/[^A-Z0-9]/g, "");
-
-    if (cleaned.length <= 2) {
-      return cleaned;
+  const handleTestActivate = async () => {
+    try {
+      await activateTestLicense.mutateAsync();
+    } catch (error) {
+      console.error("Test license activation failed:", error);
     }
-
-    const parts = [];
-    if (cleaned.startsWith("RO")) {
-      parts.push("RO");
-      const rest = cleaned.slice(2);
-      for (let i = 0; i < rest.length; i += 4) {
-        parts.push(rest.slice(i, i + 4));
-      }
-    } else {
-      // If doesn't start with RO, add it
-      parts.push("RO");
-      for (let i = 0; i < cleaned.length && parts.length < 4; i += 4) {
-        parts.push(cleaned.slice(i, i + 4));
-      }
-    }
-
-    return parts.join("-").slice(0, 17); // Max length: RO-XXXX-XXXX-XXXX
-  };
-
-  const handleKeyChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setLicenseKey(formatLicenseKey(e.target.value));
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 animate-fade-in p-4">
-      <div className="bg-slate-800 rounded-xl w-full max-w-md shadow-2xl animate-slide-in">
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 animate-fade-in p-4">
+      <div className="glass-elevated rounded-2xl w-full max-w-md shadow-2xl animate-slide-in border border-slate-700/50">
         {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b border-slate-700">
+        <div className="flex items-center justify-between p-4 border-b border-slate-700/50">
           <div className="flex items-center gap-2">
-            <Shield className="w-5 h-5 text-blue-400" />
-            <h2 className="text-lg font-semibold">License</h2>
+            <Shield className="w-5 h-5 text-cyan-400" />
+            <h2 className="text-lg font-semibold text-white">License</h2>
           </div>
           <button
             onClick={onClose}
-            className="p-2 hover:bg-slate-700 rounded-lg transition-colors"
+            className="p-2 hover:bg-slate-700/50 rounded-lg transition-colors text-slate-400 hover:text-white"
           >
             <X className="w-5 h-5" />
           </button>
@@ -171,12 +153,12 @@ export default function LicenseModal({ onClose }: LicenseModalProps) {
                   You&apos;re using RECALL.OS in trial mode. Purchase a license
                   to unlock unlimited documents.
                 </p>
-                {licenseStatus?.documents_used !== null && licenseStatus?.documents_limit !== null && (
+                {licenseStatus && licenseStatus.documents_used !== null && licenseStatus.documents_limit !== null && (
                   <div className="mt-3 pt-3 border-t border-amber-500/20">
                     <div className="flex justify-between text-sm mb-1">
                       <span className="text-slate-400">Documents</span>
                       <span className={clsx(
-                        licenseStatus.documents_used >= licenseStatus.documents_limit
+                        (licenseStatus.documents_used ?? 0) >= (licenseStatus.documents_limit ?? 1)
                           ? "text-red-400"
                           : "text-amber-400"
                       )}>
@@ -187,16 +169,16 @@ export default function LicenseModal({ onClose }: LicenseModalProps) {
                       <div
                         className={clsx(
                           "h-2 rounded-full transition-all",
-                          licenseStatus.documents_used >= licenseStatus.documents_limit
+                          (licenseStatus.documents_used ?? 0) >= (licenseStatus.documents_limit ?? 1)
                             ? "bg-red-500"
                             : "bg-amber-500"
                         )}
                         style={{
-                          width: `${Math.min(100, (licenseStatus.documents_used / licenseStatus.documents_limit) * 100)}%`
+                          width: `${Math.min(100, ((licenseStatus.documents_used ?? 0) / (licenseStatus.documents_limit ?? 1)) * 100)}%`
                         }}
                       />
                     </div>
-                    {licenseStatus.documents_used >= licenseStatus.documents_limit && (
+                    {(licenseStatus.documents_used ?? 0) >= (licenseStatus.documents_limit ?? 1) && (
                       <p className="text-xs text-red-400 mt-2">
                         Trial limit reached. Upgrade to add more documents.
                       </p>
@@ -213,17 +195,16 @@ export default function LicenseModal({ onClose }: LicenseModalProps) {
                 <input
                   type="text"
                   value={licenseKey}
-                  onChange={handleKeyChange}
-                  placeholder="RO-XXXX-XXXX-XXXX"
-                  className="w-full bg-slate-700 border border-slate-600 rounded-lg px-3 py-2 font-mono focus:outline-none focus:border-blue-500"
-                  maxLength={17}
+                  onChange={(e) => setLicenseKey(e.target.value)}
+                  placeholder="Paste your license key here"
+                  className="w-full bg-slate-700 border border-slate-600 rounded-lg px-3 py-2 font-mono text-sm focus:outline-none focus:border-blue-500"
                 />
               </div>
 
               {/* Activation button */}
               <button
                 onClick={handleActivate}
-                disabled={licenseKey.length < 17 || activateLicense.isPending}
+                disabled={licenseKey.trim().length < 8 || activateLicense.isPending}
                 className={clsx(
                   "w-full py-2.5 bg-blue-600 hover:bg-blue-500 rounded-lg transition-colors font-medium",
                   "disabled:opacity-50 disabled:cursor-not-allowed"
@@ -235,6 +216,21 @@ export default function LicenseModal({ onClose }: LicenseModalProps) {
                   "Activate License"
                 )}
               </button>
+
+              {/* Dev-only test license button */}
+              {isDev && (
+                <button
+                  onClick={handleTestActivate}
+                  disabled={activateTestLicense.isPending}
+                  className="w-full py-2 bg-purple-600 hover:bg-purple-500 rounded-lg transition-colors text-sm"
+                >
+                  {activateTestLicense.isPending ? (
+                    <Loader2 className="w-4 h-4 animate-spin mx-auto" />
+                  ) : (
+                    "Activate Test License (Dev Only)"
+                  )}
+                </button>
+              )}
 
               {/* Error message */}
               {activateLicense.isError && (
@@ -250,7 +246,7 @@ export default function LicenseModal({ onClose }: LicenseModalProps) {
               {/* Purchase link */}
               <div className="text-center pt-2">
                 <a
-                  href="https://recallos.lemonsqueezy.com/buy/recall-os"
+                  href="https://projectintuitus.lemonsqueezy.com/checkout/buy/7f77499e-81dc-4284-a288-eab6aa8d76cb"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-1 text-sm text-blue-400 hover:underline"

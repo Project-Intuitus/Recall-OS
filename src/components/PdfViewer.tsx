@@ -6,7 +6,6 @@ import { ChevronLeft, ChevronRight, ZoomIn, ZoomOut, Loader2, AlertCircle } from
 import "react-pdf/dist/Page/AnnotationLayer.css";
 import "react-pdf/dist/Page/TextLayer.css";
 
-// Set up PDF.js worker - use local copy from node_modules for security (no CDN)
 pdfjs.GlobalWorkerOptions.workerSrc = new URL(
   "pdfjs-dist/build/pdf.worker.min.mjs",
   import.meta.url
@@ -18,37 +17,77 @@ interface PdfViewerProps {
   highlightText?: string;
 }
 
-// Normalize text for comparison (remove extra whitespace, lowercase)
-function normalizeText(text: string): string {
-  return text.toLowerCase().replace(/\s+/g, " ").trim();
+// Normalize text - handle ligatures and common PDF extraction issues
+function normalize(text: string): string {
+  return text
+    .toLowerCase()
+    .normalize("NFKD")
+    // Expand common ligatures that pdfjs renders correctly
+    .replace(/ﬁ/g, "fi")
+    .replace(/ﬂ/g, "fl")
+    .replace(/ﬀ/g, "ff")
+    .replace(/ﬃ/g, "ffi")
+    .replace(/ﬄ/g, "ffl")
+    .replace(/[\u0300-\u036f]/g, "")  // Remove diacritics
+    .replace(/[^\w\s]/g, " ")          // Punctuation to space
+    .replace(/\s+/g, " ")              // Collapse whitespace
+    .trim();
 }
 
-// Find words that appear in the highlight text
-function getHighlightWords(text: string): string[] {
-  const normalized = normalizeText(text);
-  // Get significant words (longer than 3 chars) for matching
-  const words = normalized.split(/\s+/).filter((w) => w.length > 3);
-  // Return unique words
-  return [...new Set(words)];
+// Clean chunk content - remove page markers
+function cleanChunk(text: string): string {
+  return text.replace(/---\s*Page\s*\d+\s*---/gi, " ").trim();
+}
+
+// Get words, filtering out very short ones that might be ligature artifacts
+function getWords(text: string): string[] {
+  return normalize(text)
+    .split(/\s+/)
+    .filter(w => w.length > 0);
+}
+
+// Get n-grams (character sequences) from text for fuzzy matching
+function getNgrams(text: string, n: number): Set<string> {
+  const normalized = normalize(text).replace(/\s+/g, ""); // Remove spaces for ngrams
+  const ngrams = new Set<string>();
+  for (let i = 0; i <= normalized.length - n; i++) {
+    ngrams.add(normalized.slice(i, i + n));
+  }
+  return ngrams;
+}
+
+// Calculate Jaccard similarity between two sets
+function jaccardSimilarity(a: Set<string>, b: Set<string>): number {
+  const intersection = new Set([...a].filter(x => b.has(x)));
+  const union = new Set([...a, ...b]);
+  return union.size > 0 ? intersection.size / union.size : 0;
+}
+
+interface SpanData {
+  element: HTMLSpanElement;
+  text: string;
+  normalizedText: string;
+  startIdx: number;
+  endIdx: number;
 }
 
 export default function PdfViewer({ filePath, pageNumber, highlightText }: PdfViewerProps) {
   const [numPages, setNumPages] = useState<number>(0);
   const [currentPage, setCurrentPage] = useState<number>(1);
-  const [scale, setScale] = useState<number>(1.2);
+  const [scale, setScale] = useState<number>(1.0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [highlightPending, setHighlightPending] = useState(false);
+  const [matchInfo, setMatchInfo] = useState<string>("");
   const containerRef = useRef<HTMLDivElement>(null);
   const highlightTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const observerRef = useRef<MutationObserver | null>(null);
 
-  // Convert file path to Tauri asset URL
   const fileUrl = convertFileSrc(filePath);
 
-  // Navigate to specified page when it changes
   useEffect(() => {
     if (pageNumber && pageNumber > 0) {
       if (numPages === 0) {
-        // Document not loaded yet, set page for when it loads
         setCurrentPage(pageNumber);
       } else if (pageNumber <= numPages) {
         setCurrentPage(pageNumber);
@@ -56,56 +95,229 @@ export default function PdfViewer({ filePath, pageNumber, highlightText }: PdfVi
     }
   }, [pageNumber, numPages]);
 
-  // Apply text highlighting
-  const applyHighlights = useCallback(() => {
-    if (!highlightText || !containerRef.current) return;
-
-    // Clear any pending highlight operation
-    if (highlightTimeoutRef.current) {
-      clearTimeout(highlightTimeoutRef.current);
+  const applyHighlights = useCallback((scrollToFirst = true) => {
+    if (!highlightText || !containerRef.current) {
+      setHighlightPending(false);
+      return;
     }
 
-    // Delay to ensure text layer is rendered
-    highlightTimeoutRef.current = setTimeout(() => {
-      const textLayers = containerRef.current?.querySelectorAll(".react-pdf__Page__textContent");
-      if (!textLayers || textLayers.length === 0) return;
+    const textLayers = containerRef.current.querySelectorAll(".react-pdf__Page__textContent");
+    if (!textLayers || textLayers.length === 0) {
+      return;
+    }
 
-      const highlightWords = getHighlightWords(highlightText);
-      if (highlightWords.length === 0) return;
+    const cleanedChunk = cleanChunk(highlightText);
+    const chunkNgrams = getNgrams(cleanedChunk, 4); // Use 4-grams for matching
+    const chunkWords = getWords(cleanedChunk);
+    const chunkWordSet = new Set(chunkWords.filter(w => w.length > 4));
 
-      textLayers.forEach((layer) => {
-        const spans = layer.querySelectorAll("span");
-        spans.forEach((span) => {
-          const spanElement = span as HTMLSpanElement;
-          // Reset previous highlights
-          spanElement.style.backgroundColor = "";
-          spanElement.classList.remove("highlight");
+    if (chunkWords.length < 3) {
+      setHighlightPending(false);
+      setMatchInfo("Chunk too short");
+      return;
+    }
 
-          const spanText = normalizeText(spanElement.textContent || "");
-          if (!spanText) return;
+    let firstHighlight: HTMLSpanElement | null = null;
+    let highlightedCount = 0;
 
-          // Check if any highlight word is in this span
-          const hasMatch = highlightWords.some((word) => spanText.includes(word));
+    textLayers.forEach((layer) => {
+      const spans = layer.querySelectorAll("span");
 
+      // Collect span data
+      const spanDataList: SpanData[] = [];
+      let idx = 0;
+
+      spans.forEach((span) => {
+        const el = span as HTMLSpanElement;
+        el.style.backgroundColor = "";
+        el.style.borderRadius = "";
+        el.classList.remove("highlight");
+
+        const text = el.textContent || "";
+        if (text.trim().length > 0) {
+          spanDataList.push({
+            element: el,
+            text: text,
+            normalizedText: normalize(text),
+            startIdx: idx,
+            endIdx: idx + 1
+          });
+          idx++;
+        }
+      });
+
+      if (spanDataList.length === 0) return;
+
+      // Build page text
+      const pageText = spanDataList.map(s => s.text).join(" ");
+      const pageNgrams = getNgrams(pageText, 4);
+      const pageWords = getWords(pageText);
+
+      // Calculate overall similarity using ngrams
+      const ngramSimilarity = jaccardSimilarity(chunkNgrams, pageNgrams);
+
+      // Find common words
+      const commonWords = new Set<string>();
+      for (const word of chunkWordSet) {
+        if (pageWords.includes(word)) {
+          commonWords.add(word);
+        }
+      }
+
+      setMatchInfo(`Similarity: ${(ngramSimilarity * 100).toFixed(1)}%, Common words: ${commonWords.size}`);
+
+      // If very low similarity, this might not be the right page
+      if (ngramSimilarity < 0.05 && commonWords.size < 3) {
+        return;
+      }
+
+      // Strategy: Find windows of spans with highest concentration of matching content
+      const windowSize = 15;
+      let bestWindowStart = -1;
+      let bestWindowScore = 0;
+
+      for (let i = 0; i <= spanDataList.length - windowSize; i++) {
+        const windowSpans = spanDataList.slice(i, i + windowSize);
+        const windowText = windowSpans.map(s => s.text).join(" ");
+        const windowNgrams = getNgrams(windowText, 4);
+
+        // Score based on ngram overlap with chunk
+        const windowSimilarity = jaccardSimilarity(windowNgrams, chunkNgrams);
+
+        // Boost score if window contains common words
+        const windowWords = getWords(windowText);
+        let wordBoost = 0;
+        for (const word of windowWords) {
+          if (commonWords.has(word)) wordBoost += 0.02;
+        }
+
+        const totalScore = windowSimilarity + wordBoost;
+
+        if (totalScore > bestWindowScore) {
+          bestWindowScore = totalScore;
+          bestWindowStart = i;
+        }
+      }
+
+      // If we found a good window, expand it to find the best contiguous region
+      if (bestWindowStart >= 0 && bestWindowScore > 0.08) {
+        // Find the actual bounds by looking for spans with matching content
+        let startIdx = bestWindowStart;
+        let endIdx = Math.min(bestWindowStart + windowSize, spanDataList.length);
+
+        // Expand start backwards if spans have matching words
+        while (startIdx > 0) {
+          const prevSpan = spanDataList[startIdx - 1];
+          const prevWords = getWords(prevSpan.text);
+          const hasMatch = prevWords.some(w => commonWords.has(w) || chunkWordSet.has(w));
           if (hasMatch) {
-            spanElement.style.backgroundColor = "rgba(59, 130, 246, 0.35)";
-            spanElement.style.borderRadius = "2px";
-            spanElement.classList.add("highlight");
+            startIdx--;
+          } else {
+            break;
           }
+        }
+
+        // Expand end forwards
+        while (endIdx < spanDataList.length) {
+          const nextSpan = spanDataList[endIdx];
+          const nextWords = getWords(nextSpan.text);
+          const hasMatch = nextWords.some(w => commonWords.has(w) || chunkWordSet.has(w));
+          if (hasMatch) {
+            endIdx++;
+          } else {
+            break;
+          }
+        }
+
+        // Highlight the region
+        for (let i = startIdx; i < endIdx; i++) {
+          const span = spanDataList[i];
+          span.element.style.backgroundColor = "rgba(6, 182, 212, 0.35)";
+          span.element.style.borderRadius = "2px";
+          span.element.classList.add("highlight");
+          highlightedCount++;
+
+          if (!firstHighlight) {
+            firstHighlight = span.element;
+          }
+        }
+      } else if (commonWords.size >= 5) {
+        // Fallback: highlight spans containing common words
+        for (const span of spanDataList) {
+          const spanWords = getWords(span.text);
+          const hasCommon = spanWords.some(w => commonWords.has(w));
+          if (hasCommon) {
+            span.element.style.backgroundColor = "rgba(6, 182, 212, 0.25)";
+            span.element.style.borderRadius = "2px";
+            span.element.classList.add("highlight");
+            highlightedCount++;
+
+            if (!firstHighlight) {
+              firstHighlight = span.element;
+            }
+          }
+        }
+      }
+    });
+
+    setHighlightPending(false);
+
+    if (scrollToFirst && firstHighlight) {
+      requestAnimationFrame(() => {
+        firstHighlight?.scrollIntoView({
+          behavior: 'smooth',
+          block: 'center',
+          inline: 'nearest'
         });
       });
-    }, 300);
+    }
   }, [highlightText]);
 
-  // Apply highlights when page changes or loads
+  const setupHighlightObserver = useCallback(() => {
+    if (!containerRef.current || !highlightText) return;
+
+    if (observerRef.current) {
+      observerRef.current.disconnect();
+    }
+
+    setHighlightPending(true);
+
+    const existingTextLayer = containerRef.current.querySelector(".react-pdf__Page__textContent");
+    if (existingTextLayer && existingTextLayer.children.length > 0) {
+      applyHighlights(true);
+      return;
+    }
+
+    observerRef.current = new MutationObserver(() => {
+      const textLayer = containerRef.current?.querySelector(".react-pdf__Page__textContent");
+      if (textLayer && textLayer.children.length > 0) {
+        observerRef.current?.disconnect();
+        applyHighlights(true);
+      }
+    });
+
+    observerRef.current.observe(containerRef.current, {
+      childList: true,
+      subtree: true
+    });
+
+    highlightTimeoutRef.current = setTimeout(() => {
+      observerRef.current?.disconnect();
+      applyHighlights(true);
+    }, 500);
+  }, [highlightText, applyHighlights]);
+
   useEffect(() => {
-    applyHighlights();
+    setupHighlightObserver();
     return () => {
       if (highlightTimeoutRef.current) {
         clearTimeout(highlightTimeoutRef.current);
       }
+      if (observerRef.current) {
+        observerRef.current.disconnect();
+      }
     };
-  }, [currentPage, loading, applyHighlights]);
+  }, [currentPage, loading, setupHighlightObserver]);
 
   const onDocumentLoadSuccess = useCallback(
     ({ numPages: pages }: { numPages: number }) => {
@@ -113,7 +325,6 @@ export default function PdfViewer({ filePath, pageNumber, highlightText }: PdfVi
       setLoading(false);
       setError(null);
 
-      // Navigate to specified page after load
       if (pageNumber && pageNumber > 0 && pageNumber <= pages) {
         setCurrentPage(pageNumber);
       }
@@ -128,11 +339,9 @@ export default function PdfViewer({ filePath, pageNumber, highlightText }: PdfVi
   }, []);
 
   const onPageLoadSuccess = useCallback(() => {
-    // Re-apply highlights after page renders
-    applyHighlights();
-  }, [applyHighlights]);
+    setupHighlightObserver();
+  }, [setupHighlightObserver]);
 
-  // Handle clicks on PDF links - open in external browser
   const handlePdfClick = useCallback(async (e: React.MouseEvent) => {
     const target = e.target as HTMLElement;
     const link = target.closest('a');
@@ -171,9 +380,7 @@ export default function PdfViewer({ filePath, pageNumber, highlightText }: PdfVi
 
   return (
     <div className="flex flex-col h-full bg-slate-900">
-      {/* Toolbar */}
       <div className="flex items-center justify-between px-4 py-2 bg-slate-800 border-b border-slate-700 shrink-0">
-        {/* Page Navigation */}
         <div className="flex items-center gap-1">
           <button
             onClick={goToPrevPage}
@@ -206,7 +413,6 @@ export default function PdfViewer({ filePath, pageNumber, highlightText }: PdfVi
           </button>
         </div>
 
-        {/* Zoom Controls */}
         <div className="flex items-center gap-1">
           <button
             onClick={zoomOut}
@@ -230,7 +436,6 @@ export default function PdfViewer({ filePath, pageNumber, highlightText }: PdfVi
         </div>
       </div>
 
-      {/* PDF Content */}
       <div ref={containerRef} className="flex-1 overflow-auto bg-slate-900/50" onClick={handlePdfClick}>
         <div className="min-h-full flex justify-center p-4">
           {loading && (
@@ -269,13 +474,20 @@ export default function PdfViewer({ filePath, pageNumber, highlightText }: PdfVi
         </div>
       </div>
 
-      {/* Highlight Info Bar */}
       {highlightText && (
         <div className="px-4 py-2 bg-slate-800 border-t border-slate-700 shrink-0">
           <div className="flex items-start gap-2">
-            <span className="text-xs text-blue-400 shrink-0 mt-0.5">Matching text:</span>
-            <p className="text-xs text-slate-400 line-clamp-2">{highlightText}</p>
+            <span className="text-xs text-cyan-400 shrink-0 mt-0.5 flex items-center gap-1">
+              {highlightPending && <Loader2 className="w-3 h-3 animate-spin" />}
+              Source:
+            </span>
+            <p className="text-xs text-slate-400 line-clamp-2">
+              {cleanChunk(highlightText).slice(0, 120)}...
+            </p>
           </div>
+          {matchInfo && (
+            <p className="text-xs text-cyan-500/70 mt-1">{matchInfo}</p>
+          )}
         </div>
       )}
     </div>

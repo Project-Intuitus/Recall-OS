@@ -133,27 +133,27 @@ export default function SettingsModal({ onClose }: SettingsModalProps) {
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 animate-fade-in p-4">
-      <div className="bg-slate-800 rounded-xl w-full max-w-lg shadow-2xl animate-slide-in flex flex-col max-h-[90vh]">
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 animate-fade-in p-4">
+      <div className="glass-elevated rounded-2xl w-full max-w-lg shadow-2xl animate-slide-in flex flex-col max-h-[90vh] border border-slate-700/50">
         {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b border-slate-700 flex-shrink-0">
-          <h2 className="text-lg font-semibold">Settings</h2>
+        <div className="flex items-center justify-between p-4 border-b border-slate-700/50 flex-shrink-0">
+          <h2 className="text-lg font-semibold text-white">Settings</h2>
           <button
             onClick={onClose}
-            className="p-2 hover:bg-slate-700 rounded-lg transition-colors"
+            className="p-2 hover:bg-slate-700/50 rounded-lg transition-colors text-slate-400 hover:text-white"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* Tabs */}
-        <div className="flex border-b border-slate-700 flex-shrink-0 overflow-x-auto">
+        <div className="flex border-b border-slate-700/50 flex-shrink-0 overflow-x-auto">
           <button
             onClick={() => setActiveTab("api")}
             className={clsx(
               "flex items-center gap-2 px-3 py-3 text-sm transition-colors whitespace-nowrap",
               activeTab === "api"
-                ? "text-blue-400 border-b-2 border-blue-400"
+                ? "text-cyan-400 border-b-2 border-cyan-400"
                 : "text-slate-400 hover:text-slate-300"
             )}
           >
@@ -165,7 +165,7 @@ export default function SettingsModal({ onClose }: SettingsModalProps) {
             className={clsx(
               "flex items-center gap-2 px-3 py-3 text-sm transition-colors whitespace-nowrap",
               activeTab === "watch"
-                ? "text-blue-400 border-b-2 border-blue-400"
+                ? "text-cyan-400 border-b-2 border-cyan-400"
                 : "text-slate-400 hover:text-slate-300"
             )}
           >
@@ -177,7 +177,7 @@ export default function SettingsModal({ onClose }: SettingsModalProps) {
             className={clsx(
               "flex items-center gap-2 px-3 py-3 text-sm transition-colors whitespace-nowrap",
               activeTab === "capture"
-                ? "text-blue-400 border-b-2 border-blue-400"
+                ? "text-cyan-400 border-b-2 border-cyan-400"
                 : "text-slate-400 hover:text-slate-300"
             )}
           >
@@ -189,7 +189,7 @@ export default function SettingsModal({ onClose }: SettingsModalProps) {
             className={clsx(
               "flex items-center gap-2 px-3 py-3 text-sm transition-colors whitespace-nowrap",
               activeTab === "advanced"
-                ? "text-blue-400 border-b-2 border-blue-400"
+                ? "text-cyan-400 border-b-2 border-cyan-400"
                 : "text-slate-400 hover:text-slate-300"
             )}
           >
@@ -256,13 +256,17 @@ export default function SettingsModal({ onClose }: SettingsModalProps) {
                 {validateApiKey.isSuccess && (
                   <div className="flex items-center gap-2 mt-2 text-green-400 text-sm">
                     <CheckCircle className="w-4 h-4" />
-                    API key is valid
+                    API key is valid and working
                   </div>
                 )}
                 {validateApiKey.isError && (
-                  <div className="flex items-center gap-2 mt-2 text-red-400 text-sm">
-                    <AlertCircle className="w-4 h-4" />
-                    Invalid API key
+                  <div className="flex items-start gap-2 mt-2 text-red-400 text-sm bg-red-500/10 border border-red-500/20 rounded-lg p-2">
+                    <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />
+                    <span className="break-words">
+                      {validateApiKey.error instanceof Error
+                        ? validateApiKey.error.message
+                        : "API key validation failed. Please check your key and try again."}
+                    </span>
                   </div>
                 )}
 

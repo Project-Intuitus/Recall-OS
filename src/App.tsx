@@ -224,7 +224,12 @@ function App() {
   };
 
   return (
-    <div className="flex h-screen bg-slate-900">
+    <div className="flex h-screen bg-slate-900 relative overflow-hidden">
+      {/* Ambient background effects */}
+      <div className="ambient-bg" />
+      <div className="orb orb-1" />
+      <div className="orb orb-2" />
+
       {/* Sidebar */}
       <Sidebar
         onSettingsClick={() => setShowSettings(true)}
@@ -288,18 +293,25 @@ function App() {
           {toasts.map((toast) => (
             <div
               key={toast.id}
-              className={`flex items-center gap-3 px-4 py-3 rounded-lg shadow-lg animate-slide-in ${
+              className={`flex items-center gap-3 px-4 py-3 rounded-xl shadow-xl animate-slide-in backdrop-blur-xl border ${
                 toast.type === "success"
-                  ? "bg-green-600"
+                  ? "bg-emerald-500/20 border-emerald-500/30 text-emerald-300"
                   : toast.type === "error"
-                  ? "bg-red-600"
-                  : "bg-blue-600"
+                  ? "bg-red-500/20 border-red-500/30 text-red-300"
+                  : "bg-cyan-500/20 border-cyan-500/30 text-cyan-300"
               }`}
             >
-              <span className="text-white text-sm">{toast.message}</span>
+              <div className={`w-2 h-2 rounded-full ${
+                toast.type === "success"
+                  ? "bg-emerald-400 shadow-lg shadow-emerald-400/50"
+                  : toast.type === "error"
+                  ? "bg-red-400 shadow-lg shadow-red-400/50"
+                  : "bg-cyan-400 shadow-lg shadow-cyan-400/50"
+              }`} />
+              <span className="text-sm font-medium">{toast.message}</span>
               <button
                 onClick={() => removeToast(toast.id)}
-                className="text-white/70 hover:text-white"
+                className="ml-2 opacity-60 hover:opacity-100 transition-opacity text-lg leading-none"
               >
                 &times;
               </button>

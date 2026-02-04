@@ -18,6 +18,143 @@ static TIMESTAMP_REGEX: Lazy<Regex> = Lazy::new(|| {
 /// Maximum file size allowed for ingestion (500 MB)
 const MAX_FILE_SIZE: u64 = 500 * 1024 * 1024;
 
+/// Fix common ligature issues in PDF-extracted text
+/// When pdf-extract can't decode ligatures like fi, fl, ff, ffi, ffl,
+/// it often produces spaces or garbled characters. This function attempts
+/// to repair common patterns.
+fn fix_ligatures(text: &str) -> String {
+    // Common words with fi ligature that get corrupted to "f i" or " i" or just missing
+    let fi_words = [
+        ("speci c", "specific"),
+        ("signi cant", "significant"),
+        ("identi ed", "identified"),
+        ("identi cation", "identification"),
+        ("certi cate", "certificate"),
+        ("bene t", "benefit"),
+        ("bene ts", "benefits"),
+        ("ef cient", "efficient"),
+        ("ef ciency", "efficiency"),
+        ("suf cient", "sufficient"),
+        ("de ned", "defined"),
+        ("de nition", "definition"),
+        ("de nitely", "definitely"),
+        ("con rm", "confirm"),
+        ("con rmed", "confirmed"),
+        ("con gur", "configur"),
+        ("modi ed", "modified"),
+        ("modi cation", "modification"),
+        ("veri ed", "verified"),
+        ("veri cation", "verification"),
+        ("classi ed", "classified"),
+        ("classi cation", "classification"),
+        ("quali ed", "qualified"),
+        ("quanti ed", "quantified"),
+        ("simpli ed", "simplified"),
+        ("ampli ed", "amplified"),
+        ("noti ed", "notified"),
+        ("noti cation", "notification"),
+        ("justi ed", "justified"),
+        ("certi ed", "certified"),
+        ("puri ed", "purified"),
+        ("speci ed", "specified"),
+        ("digni ed", "dignified"),
+        (" rst", "first"),
+        (" nal", "final"),
+        (" nally", "finally"),
+        (" nd", "find"),
+        (" nding", "finding"),
+        (" ndings", "findings"),
+        (" le", "file"),
+        (" les", "files"),
+        (" lter", "filter"),
+        (" eld", "field"),
+        (" elds", "fields"),
+        (" gure", "figure"),
+        (" gures", "figures"),
+        (" nite", "finite"),
+        (" nish", "finish"),
+        (" x", "fix"),
+        (" xed", "fixed"),
+        (" lm", "film"),
+        (" ll", "fill"),
+        (" lled", "filled"),
+        (" re", "fire"),
+        (" t", "fit"),
+        (" tness", "fitness"),
+        (" ve", "five"),
+    ];
+
+    // Common words with fl ligature
+    let fl_words = [
+        ("in uence", "influence"),
+        ("in uenced", "influenced"),
+        ("con ict", "conflict"),
+        ("con icts", "conflicts"),
+        ("re ect", "reflect"),
+        ("re ected", "reflected"),
+        ("re ection", "reflection"),
+        (" ow", "flow"),
+        (" ows", "flows"),
+        (" uid", "fluid"),
+        (" uids", "fluids"),
+        (" ag", "flag"),
+        (" ags", "flags"),
+        (" at", "flat"),
+        (" oor", "floor"),
+        (" y", "fly"),
+        (" ight", "flight"),
+        (" ex", "flex"),
+        (" exible", "flexible"),
+        (" exibility", "flexibility"),
+    ];
+
+    // Common words with ff ligature
+    let ff_words = [
+        ("e ect", "effect"),
+        ("e ects", "effects"),
+        ("e ective", "effective"),
+        ("e ectively", "effectively"),
+        ("e ort", "effort"),
+        ("e orts", "efforts"),
+        ("di erent", "different"),
+        ("di erence", "difference"),
+        ("di erences", "differences"),
+        ("di cult", "difficult"),
+        ("di culty", "difficulty"),
+        ("o er", "offer"),
+        ("o ers", "offers"),
+        ("o ered", "offered"),
+        ("a ect", "affect"),
+        ("a ects", "affects"),
+        ("a ected", "affected"),
+        ("a ord", "afford"),
+        ("su er", "suffer"),
+        ("su ering", "suffering"),
+        ("co ee", "coffee"),
+        ("sta ", "staff"),
+        ("stu ", "stuff"),
+    ];
+
+    let mut result = text.to_string();
+
+    // Apply fi fixes
+    for (broken, fixed) in fi_words.iter() {
+        result = result.replace(broken, fixed);
+    }
+
+    // Apply fl fixes
+    for (broken, fixed) in fl_words.iter() {
+        result = result.replace(broken, fixed);
+    }
+
+    // Apply ff fixes
+    for (broken, fixed) in ff_words.iter() {
+        result = result.replace(broken, fixed);
+    }
+
+    result
+}
+
 /// Validate file size before reading into memory
 fn validate_file_size(path: &Path) -> Result<()> {
     let metadata = std::fs::metadata(path)?;
@@ -49,8 +186,10 @@ pub async fn extract_pdf_with_progress(
         Ok(text) => {
             if !text.trim().is_empty() {
                 tracing::info!("PDF text extraction successful: {:?}", path);
+                // Fix common ligature issues from pdf-extract
+                let fixed_text = fix_ligatures(&text);
                 let pages = extract_pdf_pages(&bytes);
-                return Ok(ExtractedContent::Text { text, pages });
+                return Ok(ExtractedContent::Text { text: fixed_text, pages });
             }
             tracing::warn!("PDF has no extractable text, trying OCR: {:?}", path);
             if let Some(cb) = on_progress {

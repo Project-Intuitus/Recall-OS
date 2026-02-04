@@ -31,6 +31,8 @@ pub struct RelatedDocumentInfo {
 const NOTIFICATION_WIDTH: f64 = 356.0;  // 340 content + 16 padding
 const NOTIFICATION_HEIGHT: f64 = 120.0; // Small initial height, will auto-resize
 const NOTIFICATION_MARGIN: f64 = 16.0;
+/// Extra margin for taskbar (Windows 11 default taskbar is ~48px)
+const TASKBAR_MARGIN: f64 = 60.0;
 
 /// Show a custom notification window
 pub fn show_notification<R: Runtime>(
@@ -44,8 +46,9 @@ pub fn show_notification<R: Runtime>(
     let (screen_width, screen_height) = get_screen_dimensions(app)?;
 
     // Calculate position (bottom-right corner with margin)
+    // Account for taskbar height on Windows 11
     let x = screen_width - NOTIFICATION_WIDTH - NOTIFICATION_MARGIN;
-    let y = screen_height - NOTIFICATION_HEIGHT - NOTIFICATION_MARGIN - 40.0; // Extra 40px for taskbar
+    let y = screen_height - NOTIFICATION_HEIGHT - NOTIFICATION_MARGIN - TASKBAR_MARGIN;
 
     // Create the notification window
     let _window = WebviewWindowBuilder::new(
@@ -79,24 +82,51 @@ pub fn show_notification<R: Runtime>(
     Ok(())
 }
 
-/// Get screen dimensions from the primary monitor
+/// Get screen dimensions from the primary monitor in logical pixels
+///
+/// Windows uses DPI scaling, so we need to convert physical pixels to logical pixels
+/// by dividing by the scale factor. This ensures the notification appears in the
+/// correct position regardless of display scaling (100%, 125%, 150%, 200%, etc.)
 fn get_screen_dimensions<R: Runtime>(
     app: &AppHandle<R>,
 ) -> Result<(f64, f64), Box<dyn std::error::Error + Send + Sync>> {
     // Try to get the primary monitor
     if let Some(monitor) = app.primary_monitor()? {
         let size = monitor.size();
-        return Ok((size.width as f64, size.height as f64));
+        let scale_factor = monitor.scale_factor();
+
+        // Convert physical pixels to logical pixels
+        let logical_width = size.width as f64 / scale_factor;
+        let logical_height = size.height as f64 / scale_factor;
+
+        tracing::debug!(
+            "Primary monitor: {}x{} physical, scale={}, {}x{} logical",
+            size.width, size.height, scale_factor, logical_width, logical_height
+        );
+
+        return Ok((logical_width, logical_height));
     }
 
     // Fallback to available monitors
     let monitors = app.available_monitors()?;
     if let Some(monitor) = monitors.first() {
         let size = monitor.size();
-        return Ok((size.width as f64, size.height as f64));
+        let scale_factor = monitor.scale_factor();
+
+        // Convert physical pixels to logical pixels
+        let logical_width = size.width as f64 / scale_factor;
+        let logical_height = size.height as f64 / scale_factor;
+
+        tracing::debug!(
+            "Fallback monitor: {}x{} physical, scale={}, {}x{} logical",
+            size.width, size.height, scale_factor, logical_width, logical_height
+        );
+
+        return Ok((logical_width, logical_height));
     }
 
-    // Default fallback
+    // Default fallback (assumes 1080p at 100% scaling)
+    tracing::warn!("No monitors found, using default 1920x1080");
     Ok((1920.0, 1080.0))
 }
 

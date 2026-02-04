@@ -105,9 +105,9 @@ function FormattedChunkContent({ content }: { content: string }) {
       {sections.map((section, index) => (
         <div key={index} className="relative">
           {section.pageNumber !== null && (
-            <div className="flex items-center gap-2 mb-2 pb-2 border-b border-slate-600/50">
-              <BookOpen className="w-4 h-4 text-blue-400" />
-              <span className="text-sm font-medium text-blue-400">
+            <div className="flex items-center gap-2 mb-2 pb-2 border-b border-cyan-500/20">
+              <BookOpen className="w-4 h-4 text-cyan-400" />
+              <span className="text-sm font-medium text-cyan-400">
                 Page {section.pageNumber}
               </span>
             </div>
@@ -151,19 +151,19 @@ export default function SourcePanel({ source, onClose }: SourcePanelProps) {
                         chunksError instanceof Error ? chunksError.message :
                         "Failed to load source data";
     return (
-      <div className="flex flex-col h-full bg-slate-800">
-        <div className="flex items-center justify-between p-4 border-b border-slate-700">
+      <div className="flex flex-col h-full glass-elevated">
+        <div className="flex items-center justify-between p-4 border-b border-slate-700/50">
           <h3 className="font-medium text-red-400">Error Loading Source</h3>
           <button
             onClick={onClose}
-            className="p-2 hover:bg-slate-700 rounded-lg transition-colors"
+            className="p-2 hover:bg-slate-700/50 rounded-lg transition-colors text-slate-400 hover:text-white"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
         <div className="flex-1 flex items-center justify-center p-8">
-          <div className="text-center">
-            <div className="text-red-400 mb-2">Failed to load source</div>
+          <div className="text-center glass rounded-xl p-6 border border-red-500/20">
+            <div className="text-red-400 mb-2 font-medium">Failed to load source</div>
             <div className="text-sm text-slate-500">{errorMessage}</div>
           </div>
         </div>
@@ -224,20 +224,20 @@ export default function SourcePanel({ source, onClose }: SourcePanelProps) {
   };
 
   return (
-    <div className="flex flex-col h-full bg-slate-800">
+    <div className="flex flex-col h-full glass-elevated relative z-10">
       {/* Header */}
-      <div className="flex items-center justify-between p-4 border-b border-slate-700">
+      <div className="flex items-center justify-between p-4 border-b border-slate-700/50">
         <div className="flex items-center gap-3 min-w-0">
-          <span className="text-blue-400">{getFileIcon()}</span>
+          <span className="text-cyan-400">{getFileIcon()}</span>
           <div className="min-w-0">
-            <h3 className="font-medium truncate">{source.document_title}</h3>
+            <h3 className="font-medium truncate text-white">{source.document_title}</h3>
             {currentChunk && (
               <div className="flex items-center gap-2 text-sm text-slate-400">
                 {currentChunk.page_number && (
-                  <span>Page {currentChunk.page_number}</span>
+                  <span className="text-cyan-400/80">Page {currentChunk.page_number}</span>
                 )}
                 {currentChunk.timestamp_start !== null && (
-                  <span>
+                  <span className="text-cyan-400/80">
                     {formatTimestamp(currentChunk.timestamp_start)}
                     {currentChunk.timestamp_end !== null && (
                       <> - {formatTimestamp(currentChunk.timestamp_end)}</>
@@ -251,13 +251,13 @@ export default function SourcePanel({ source, onClose }: SourcePanelProps) {
         <div className="flex items-center gap-2">
           {/* View mode toggle for media files */}
           {(isPdf || isVideo || isAudio || isVisualMedia) && (
-            <div className="flex items-center bg-slate-700 rounded-lg p-0.5">
+            <div className="flex items-center bg-slate-700/50 rounded-lg p-0.5 border border-slate-600/30">
               <button
                 onClick={() => setViewMode("preview")}
                 className={clsx(
-                  "p-1.5 rounded-md transition-colors",
+                  "p-1.5 rounded-md transition-all duration-200",
                   viewMode === "preview"
-                    ? "bg-blue-600 text-white"
+                    ? "bg-gradient-to-br from-cyan-500 to-blue-600 text-white shadow-lg shadow-cyan-500/20"
                     : "text-slate-400 hover:text-white"
                 )}
                 title="PDF Preview"
@@ -267,9 +267,9 @@ export default function SourcePanel({ source, onClose }: SourcePanelProps) {
               <button
                 onClick={() => setViewMode("chunks")}
                 className={clsx(
-                  "p-1.5 rounded-md transition-colors",
+                  "p-1.5 rounded-md transition-all duration-200",
                   viewMode === "chunks"
-                    ? "bg-blue-600 text-white"
+                    ? "bg-gradient-to-br from-cyan-500 to-blue-600 text-white shadow-lg shadow-cyan-500/20"
                     : "text-slate-400 hover:text-white"
                 )}
                 title="Chunk List"
@@ -280,7 +280,7 @@ export default function SourcePanel({ source, onClose }: SourcePanelProps) {
           )}
           <button
             onClick={onClose}
-            className="p-2 hover:bg-slate-700 rounded-lg transition-colors"
+            className="p-2 hover:bg-slate-700/50 rounded-lg transition-colors text-slate-400 hover:text-white"
           >
             <X className="w-5 h-5" />
           </button>
@@ -294,7 +294,7 @@ export default function SourcePanel({ source, onClose }: SourcePanelProps) {
           <PdfViewer
             filePath={document.file_path}
             pageNumber={currentChunk?.page_number}
-            highlightText={source.content}
+            highlightText={currentChunk?.content || source.content}
           />
         )}
 

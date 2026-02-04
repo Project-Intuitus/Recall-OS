@@ -333,7 +333,7 @@ export default function Sidebar({
   return (
     <div
       className={clsx(
-        "flex flex-col bg-slate-800 border-r border-slate-700 transition-all duration-300",
+        "flex flex-col glass-elevated border-r border-slate-700 transition-all duration-300 relative z-10",
         isExpanded ? "w-72" : "w-16"
       )}
     >
@@ -345,38 +345,38 @@ export default function Sidebar({
         {isExpanded ? (
           <div className="flex items-center gap-2.5">
             <div className="relative flex-shrink-0">
-              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center shadow-lg shadow-blue-500/20">
+              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center shadow-lg shadow-cyan-500/30 glow-hover">
                 <RecallIcon className="w-5 h-5 text-white" />
               </div>
-              <div className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-green-500 rounded-full border-2 border-slate-800" />
+              <div className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-emerald-500 rounded-full border-2 border-slate-800 shadow-lg shadow-emerald-500/50" />
             </div>
             <div className="flex flex-col">
               <h1 className="text-base font-bold tracking-tight">
                 <span className="text-white">RECALL</span>
-                <span className="text-blue-400">.OS</span>
+                <span className="text-gradient">.OS</span>
               </h1>
               <span className="text-[10px] text-slate-500 -mt-0.5">Personal AI Memory</span>
             </div>
           </div>
         ) : (
           <div className="relative flex-shrink-0">
-            <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center shadow-lg shadow-blue-500/20">
+            <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center shadow-lg shadow-cyan-500/30">
               <RecallIcon className="w-5 h-5 text-white" />
             </div>
-            <div className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-green-500 rounded-full border-2 border-slate-800" />
+            <div className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-emerald-500 rounded-full border-2 border-slate-800 shadow-lg shadow-emerald-500/50" />
           </div>
         )}
         <button
           onClick={() => setIsExpanded(!isExpanded)}
           className={clsx(
-            "p-1.5 hover:bg-slate-700 rounded-lg transition-colors",
+            "p-1.5 hover:bg-slate-700 rounded-lg transition-all duration-200 text-slate-400 hover:text-white",
             !isExpanded && "w-9 h-9 flex items-center justify-center"
           )}
           title={isExpanded ? "Collapse sidebar" : "Expand sidebar"}
         >
           <ChevronRight
             className={clsx(
-              "w-4 h-4 transition-transform",
+              "w-4 h-4 transition-transform duration-200",
               isExpanded && "rotate-180"
             )}
           />

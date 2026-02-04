@@ -45,6 +45,12 @@ pub struct Settings {
     pub license_key: Option<String>,
     #[serde(default)]
     pub license_activated_at: Option<String>,
+    #[serde(default)]
+    pub license_customer_name: Option<String>,
+    #[serde(default)]
+    pub license_customer_email: Option<String>,
+    #[serde(default)]
+    pub license_instance_id: Option<String>,
 }
 
 fn default_auto_ingest() -> bool {
@@ -94,6 +100,9 @@ impl Default for Settings {
             capture_hotkey: "Ctrl+Shift+S".to_string(),
             license_key: None,
             license_activated_at: None,
+            license_customer_name: None,
+            license_customer_email: None,
+            license_instance_id: None,
         }
     }
 }

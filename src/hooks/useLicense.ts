@@ -8,6 +8,8 @@ export interface LicenseStatus {
   tier: "trial" | "licensed";
   documents_used: number | null;
   documents_limit: number | null;
+  customer_name: string | null;
+  customer_email: string | null;
 }
 
 export function useLicenseStatus() {
@@ -30,6 +32,7 @@ export function useActivateLicense() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["license-status"] });
+      queryClient.invalidateQueries({ queryKey: ["stats"] });
     },
   });
 }
@@ -43,6 +46,37 @@ export function useDeactivateLicense() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["license-status"] });
+      queryClient.invalidateQueries({ queryKey: ["stats"] });
+    },
+  });
+}
+
+export function useVerifyLicense() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async () => {
+      return await invoke<boolean>("verify_license");
+    },
+    onSuccess: (isValid) => {
+      if (!isValid) {
+        queryClient.invalidateQueries({ queryKey: ["license-status"] });
+      }
+    },
+  });
+}
+
+// Debug only - activate test license
+export function useActivateTestLicense() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async () => {
+      return await invoke<LicenseStatus>("activate_test_license");
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["license-status"] });
+      queryClient.invalidateQueries({ queryKey: ["stats"] });
     },
   });
 }

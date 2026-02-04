@@ -27,14 +27,14 @@ export default function HelpModal({ onClose }: HelpModalProps) {
   const [activeTab, setActiveTab] = useState<TabId>("getting-started");
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-      <div className="bg-slate-800 rounded-xl w-full max-w-3xl max-h-[80vh] flex flex-col shadow-2xl">
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 animate-fade-in">
+      <div className="glass-elevated rounded-2xl w-full max-w-3xl max-h-[80vh] flex flex-col shadow-2xl border border-slate-700/50 animate-slide-in">
         {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b border-slate-700">
-          <h2 className="text-lg font-semibold">Help & Reference</h2>
+        <div className="flex items-center justify-between p-4 border-b border-slate-700/50">
+          <h2 className="text-lg font-semibold text-white">Help & Reference</h2>
           <button
             onClick={onClose}
-            className="p-1 hover:bg-slate-700 rounded transition-colors"
+            className="p-1 hover:bg-slate-700/50 rounded transition-colors text-slate-400 hover:text-white"
           >
             <X className="w-5 h-5" />
           </button>
@@ -42,16 +42,16 @@ export default function HelpModal({ onClose }: HelpModalProps) {
 
         <div className="flex flex-1 overflow-hidden">
           {/* Tab navigation */}
-          <div className="w-48 border-r border-slate-700 p-2 shrink-0">
+          <div className="w-48 border-r border-slate-700/50 p-2 shrink-0">
             {tabs.map((tab) => (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
                 className={clsx(
-                  "flex items-center gap-2 w-full px-3 py-2 rounded-lg text-left text-sm transition-colors",
+                  "flex items-center gap-2 w-full px-3 py-2 rounded-lg text-left text-sm transition-all duration-200",
                   activeTab === tab.id
-                    ? "bg-blue-600 text-white"
-                    : "hover:bg-slate-700 text-slate-300"
+                    ? "bg-gradient-to-r from-cyan-500 to-blue-600 text-white shadow-lg shadow-cyan-500/20"
+                    : "hover:bg-slate-700/50 text-slate-300"
                 )}
               >
                 {tab.icon}

@@ -138,8 +138,8 @@ export default function ChatPanel({
   const renderMessage = (message: Message) => {
     if (message.role === "user") {
       return (
-        <div className="flex justify-end mb-4">
-          <div className="max-w-[80%] bg-blue-600 text-white rounded-2xl rounded-br-md px-4 py-3">
+        <div className="flex justify-end mb-4 animate-fade-in">
+          <div className="max-w-[80%] bg-gradient-to-br from-cyan-500 to-blue-600 text-white rounded-2xl rounded-br-md px-4 py-3 shadow-lg shadow-cyan-500/20">
             <p className="whitespace-pre-wrap">{message.content}</p>
           </div>
         </div>
@@ -147,8 +147,8 @@ export default function ChatPanel({
     }
 
     return (
-      <div className="mb-4">
-        <div className="max-w-[80%] bg-slate-700 rounded-2xl rounded-bl-md px-4 py-3">
+      <div className="mb-4 animate-fade-in">
+        <div className="max-w-[80%] glass rounded-2xl rounded-bl-md px-4 py-3">
           <div className="prose prose-invert max-w-none">
             <ReactMarkdown
               rehypePlugins={[rehypeSanitize]}
@@ -160,8 +160,8 @@ export default function ChatPanel({
 
           {/* Citations */}
           {message.citations.length > 0 && (
-            <div className="mt-3 pt-3 border-t border-slate-600">
-              <div className="text-xs text-slate-400 mb-2">Sources:</div>
+            <div className="mt-3 pt-3 border-t border-slate-600/50">
+              <div className="text-xs text-cyan-400 mb-2 font-medium">Sources:</div>
               <div className="flex flex-wrap gap-2">
                 {message.citations.map((citation, index) => (
                   <CitationChip
@@ -220,19 +220,26 @@ export default function ChatPanel({
   };
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col h-full relative z-10">
       {/* Messages */}
       <div className="flex-1 overflow-y-auto p-4">
         {messages.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full text-slate-500">
-            <Sparkles className="w-12 h-12 mb-4 text-blue-400" />
-            <h2 className="text-xl font-semibold text-slate-300 mb-2">
-              Welcome to RECALL.OS
+            <div className="relative">
+              <div className="absolute inset-0 bg-cyan-500/20 blur-3xl rounded-full" />
+              <Sparkles className="w-14 h-14 mb-4 text-cyan-400 relative z-10" />
+            </div>
+            <h2 className="text-2xl font-bold text-white mb-2 tracking-tight">
+              Welcome to <span className="text-gradient">RECALL.OS</span>
             </h2>
-            <p className="text-center max-w-md">
+            <p className="text-center max-w-md text-slate-400 leading-relaxed">
               Ask questions about your documents. I'll search through your
               knowledge base and provide answers with citations.
             </p>
+            <div className="mt-6 flex items-center gap-2 text-xs text-slate-500">
+              <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-lg shadow-emerald-500/50 animate-pulse" />
+              <span>Ready to assist</span>
+            </div>
           </div>
         ) : (
           <>
@@ -240,8 +247,11 @@ export default function ChatPanel({
               <div key={message.id}>{renderMessage(message)}</div>
             ))}
             {queryMutation.isPending && (
-              <div className="flex items-center gap-2 text-slate-400 mb-4">
-                <Loader2 className="w-5 h-5 animate-spin" />
+              <div className="flex items-center gap-3 text-slate-400 mb-4 glass rounded-xl px-4 py-3 max-w-[80%] animate-fade-in">
+                <div className="relative">
+                  <Loader2 className="w-5 h-5 animate-spin text-cyan-400" />
+                  <div className="absolute inset-0 bg-cyan-400/30 blur-md rounded-full" />
+                </div>
                 <span>Searching and analyzing...</span>
               </div>
             )}
@@ -251,11 +261,15 @@ export default function ChatPanel({
       </div>
 
       {/* Input */}
-      <div className="border-t border-slate-700 p-4">
+      <div className="border-t border-slate-700/50 p-4 glass">
         {queryMutation.isError && (
-          <div className="flex items-center gap-2 text-red-400 text-sm mb-3">
-            <AlertCircle className="w-4 h-4" />
-            <span>Failed to get response. Please try again.</span>
+          <div className="flex items-center gap-2 text-red-400 text-sm mb-3 bg-red-500/10 border border-red-500/20 rounded-lg px-3 py-2">
+            <AlertCircle className="w-4 h-4 flex-shrink-0" />
+            <span className="break-words">
+              {queryMutation.error instanceof Error
+                ? queryMutation.error.message
+                : "Failed to get response. Please try again."}
+            </span>
           </div>
         )}
 
@@ -267,9 +281,9 @@ export default function ChatPanel({
             onKeyDown={handleKeyDown}
             placeholder="Ask a question about your documents..."
             className={clsx(
-              "flex-1 bg-slate-800 border border-slate-600 rounded-xl px-4 py-3",
-              "resize-none focus:outline-none focus:border-blue-500",
-              "placeholder:text-slate-500"
+              "flex-1 bg-slate-800/50 border border-slate-600/50 rounded-xl px-4 py-3",
+              "resize-none focus:outline-none focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/20",
+              "placeholder:text-slate-500 transition-all duration-200"
             )}
             rows={1}
             style={{
@@ -287,8 +301,8 @@ export default function ChatPanel({
             type="submit"
             disabled={!input.trim() || queryMutation.isPending}
             className={clsx(
-              "px-4 py-3 bg-blue-600 hover:bg-blue-500 rounded-xl transition-colors",
-              "disabled:opacity-50 disabled:cursor-not-allowed"
+              "px-4 py-3 btn-primary rounded-xl transition-all duration-200",
+              "disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-none"
             )}
           >
             {queryMutation.isPending ? (
@@ -300,7 +314,7 @@ export default function ChatPanel({
         </form>
 
         <div className="text-xs text-slate-500 mt-2 text-center">
-          Press Enter to send, Shift+Enter for new line
+          Press <kbd className="px-1.5 py-0.5 bg-slate-700/50 rounded text-slate-400">Enter</kbd> to send, <kbd className="px-1.5 py-0.5 bg-slate-700/50 rounded text-slate-400">Shift+Enter</kbd> for new line
         </div>
       </div>
     </div>

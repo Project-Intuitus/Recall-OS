@@ -272,8 +272,9 @@ pub fn run() {
             commands::license::get_license_status,
             commands::license::activate_license,
             commands::license::deactivate_license,
+            commands::license::verify_license,
             #[cfg(debug_assertions)]
-            commands::license::generate_test_license,
+            commands::license::activate_test_license,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
