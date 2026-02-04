@@ -166,8 +166,9 @@ We welcome contributions. Please see [CONTRIBUTING.md](CONTRIBUTING.md) for guid
 
 ## Support
 
-- [GitHub Issues](https://github.com/Project-Intuitus/Recall-OS/issues) — Bug reports & feature requests
-- [Website](https://projectintuitus.com) — Product information
+- [**Support Guide**](SUPPORT.md) — Troubleshooting & common issues
+- [**GitHub Issues**](https://github.com/Project-Intuitus/Recall-OS/issues) — Bug reports & feature requests
+- [**Website**](https://projectintuitus.com) — Product information
 
 <br>
 
