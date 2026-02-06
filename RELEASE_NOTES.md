@@ -23,7 +23,7 @@ Bug fixes, stability improvements, and updated licensing flow.
 ### Changes
 
 **Licensing Coming Soon**
-- License purchasing is not yet available — LemonSqueezy approval pending
+- License purchasing is not yet available — Paddle approval pending
 - In-app license modal now shows "Coming Soon" with a waitlist signup link
 - All trial features remain fully functional (25 documents, all capabilities)
 - Join the waitlist at projectintuitus.com to be notified when licensing launches

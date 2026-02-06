@@ -6,6 +6,18 @@ use std::path::{Path, PathBuf};
 use std::process::Command;
 use tempfile::TempDir;
 
+/// Create a Command that hides the console window on Windows
+fn hidden_command(program: &Path) -> Command {
+    let mut cmd = Command::new(program);
+    #[cfg(windows)]
+    {
+        use std::os::windows::process::CommandExt;
+        const CREATE_NO_WINDOW: u32 = 0x08000000;
+        cmd.creation_flags(CREATE_NO_WINDOW);
+    }
+    cmd
+}
+
 // Pre-compiled regex patterns for ffmpeg output parsing
 static DURATION_REGEX: Lazy<Regex> = Lazy::new(|| {
     Regex::new(r"Duration: (\d+):(\d+):(\d+\.?\d*)").unwrap()
@@ -54,7 +66,7 @@ impl FFmpeg {
 
     pub async fn get_duration(&self, video_path: &Path) -> Result<f64> {
         let video_path_str = video_path.to_string_lossy();
-        let output = Command::new(&self.binary_path)
+        let output = hidden_command(&self.binary_path)
             .args([
                 "-i",
                 &video_path_str,
@@ -87,7 +99,7 @@ impl FFmpeg {
         let video_path_str = video_path.to_string_lossy();
         let output_pattern_str = output_pattern.to_string_lossy();
 
-        let output = Command::new(&self.binary_path)
+        let output = hidden_command(&self.binary_path)
             .args([
                 "-i",
                 &*video_path_str,
@@ -139,7 +151,7 @@ impl FFmpeg {
         let video_path_str = video_path.to_string_lossy();
         let output_path_str = output_path.to_string_lossy();
 
-        let output = Command::new(&self.binary_path)
+        let output = hidden_command(&self.binary_path)
             .args([
                 "-i",
                 &*video_path_str,
@@ -173,7 +185,7 @@ impl FFmpeg {
         let audio_path_str = audio_path.to_string_lossy();
         let output_path_str = output_path.to_string_lossy();
 
-        let output = Command::new(&self.binary_path)
+        let output = hidden_command(&self.binary_path)
             .args([
                 "-i",
                 &*audio_path_str,
@@ -199,7 +211,7 @@ impl FFmpeg {
 
     pub async fn get_video_info(&self, video_path: &Path) -> Result<VideoInfo> {
         let video_path_str = video_path.to_string_lossy();
-        let output = Command::new(&self.binary_path)
+        let output = hidden_command(&self.binary_path)
             .args([
                 "-i",
                 &*video_path_str,

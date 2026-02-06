@@ -100,7 +100,7 @@ npm run tauri:build
 ### Pending (User Actions)
 - [ ] Enable GitHub Pages (Settings > Pages > Deploy from branch main, folder /docs)
 - [ ] Close running dev server and test build
-- [ ] Set up LemonSqueezy account for payments
+- [ ] Set up Paddle account for payments
 - [ ] Purchase code signing certificate (optional)
 - [ ] Test installer on clean Windows machine
 
@@ -188,7 +188,7 @@ npm run build
 
 ### Immediate
 1. **Test production build** - Close dev server, run `npm run tauri:build`
-2. **Set up LemonSqueezy** - For license key sales
+2. **Set up Paddle** - For license key sales
 3. **Enable GitHub Pages** - Settings > Pages > Deploy from /docs folder
 
 ### Future Enhancements

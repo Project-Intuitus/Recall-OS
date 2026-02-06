@@ -7,8 +7,8 @@ use tauri::State;
 /// Maximum documents allowed in trial mode
 pub const TRIAL_DOCUMENT_LIMIT: usize = 25;
 
-/// LemonSqueezy Product ID for RECALL.OS
-const LEMONSQUEEZY_PRODUCT_ID: u64 = 805257;
+/// Paddle Product ID for RECALL.OS (to be updated after Paddle approval)
+const PADDLE_PRODUCT_ID: u64 = 0; // TODO: Replace with actual Paddle product ID
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct LicenseStatus {
@@ -35,19 +35,20 @@ impl Default for LicenseTier {
     }
 }
 
-/// LemonSqueezy API response structures
+/// Paddle API response structures
+/// TODO: Update these structs to match Paddle's actual API response format
 #[derive(Debug, Deserialize)]
 #[allow(dead_code)]
-struct LemonSqueezyValidateResponse {
+struct PaddleValidateResponse {
     valid: bool,
     error: Option<String>,
-    license_key: Option<LemonSqueezyLicenseKey>,
-    meta: Option<LemonSqueezyMeta>,
+    license_key: Option<PaddleLicenseKey>,
+    meta: Option<PaddleMeta>,
 }
 
 #[derive(Debug, Deserialize)]
 #[allow(dead_code)]
-struct LemonSqueezyLicenseKey {
+struct PaddleLicenseKey {
     id: u64,
     status: String,
     key: String,
@@ -58,7 +59,7 @@ struct LemonSqueezyLicenseKey {
 
 #[derive(Debug, Deserialize)]
 #[allow(dead_code)]
-struct LemonSqueezyMeta {
+struct PaddleMeta {
     product_id: u64,
     product_name: String,
     customer_id: u64,
@@ -68,24 +69,24 @@ struct LemonSqueezyMeta {
 
 #[derive(Debug, Deserialize)]
 #[allow(dead_code)]
-struct LemonSqueezyActivateResponse {
+struct PaddleActivateResponse {
     activated: bool,
     error: Option<String>,
-    license_key: Option<LemonSqueezyLicenseKey>,
-    instance: Option<LemonSqueezyInstance>,
-    meta: Option<LemonSqueezyMeta>,
+    license_key: Option<PaddleLicenseKey>,
+    instance: Option<PaddleInstance>,
+    meta: Option<PaddleMeta>,
 }
 
 #[derive(Debug, Deserialize)]
 #[allow(dead_code)]
-struct LemonSqueezyDeactivateResponse {
+struct PaddleDeactivateResponse {
     deactivated: bool,
     error: Option<String>,
 }
 
 #[derive(Debug, Deserialize)]
 #[allow(dead_code)]
-struct LemonSqueezyInstance {
+struct PaddleInstance {
     id: String,
     name: String,
 }
@@ -127,7 +128,7 @@ pub async fn get_license_status(state: State<'_, Arc<AppState>>) -> Result<Licen
     }
 }
 
-/// Validate and activate a license key via LemonSqueezy API
+/// Validate and activate a license key via Paddle API
 #[tauri::command]
 pub async fn activate_license(
     state: State<'_, Arc<AppState>>,
@@ -142,11 +143,12 @@ pub async fn activate_license(
     // Get a unique instance identifier for this machine
     let instance_id = get_instance_id();
 
-    // Call LemonSqueezy API to activate the license
+    // Call Paddle API to activate the license
+    // TODO: Update URL to Paddle's license activation endpoint
     let client = reqwest::Client::new();
 
     let response = client
-        .post("https://api.lemonsqueezy.com/v1/licenses/activate")
+        .post("https://api.paddle.com/v1/licenses/activate")
         .header("Accept", "application/json")
         .header("Content-Type", "application/json")
         .json(&serde_json::json!({
@@ -158,7 +160,7 @@ pub async fn activate_license(
         .map_err(|e| RecallError::Other(format!("Failed to connect to license server: {}", e)))?;
 
     let _status = response.status();
-    let body: LemonSqueezyActivateResponse = response
+    let body: PaddleActivateResponse = response
         .json()
         .await
         .map_err(|e| RecallError::Other(format!("Invalid response from license server: {}", e)))?;
@@ -174,7 +176,7 @@ pub async fn activate_license(
 
     // Verify this is for our product
     if let Some(ref meta) = body.meta {
-        if meta.product_id != LEMONSQUEEZY_PRODUCT_ID {
+        if meta.product_id != PADDLE_PRODUCT_ID {
             return Err(RecallError::Other("This license key is not valid for RECALL.OS".to_string()));
         }
     }
@@ -196,7 +198,7 @@ pub async fn activate_license(
     }
     state.save_settings()?;
 
-    tracing::info!("License activated successfully via LemonSqueezy");
+    tracing::info!("License activated successfully via Paddle");
 
     Ok(LicenseStatus {
         is_valid: true,
@@ -223,7 +225,7 @@ pub async fn deactivate_license(state: State<'_, Arc<AppState>>) -> Result<(), R
         let client = reqwest::Client::new();
 
         let response = client
-            .post("https://api.lemonsqueezy.com/v1/licenses/deactivate")
+            .post("https://api.paddle.com/v1/licenses/deactivate")
             .header("Accept", "application/json")
             .header("Content-Type", "application/json")
             .json(&serde_json::json!({
@@ -269,7 +271,7 @@ pub async fn verify_license(state: State<'_, Arc<AppState>>) -> Result<bool, Rec
     let client = reqwest::Client::new();
 
     let response = client
-        .post("https://api.lemonsqueezy.com/v1/licenses/validate")
+        .post("https://api.paddle.com/v1/licenses/validate")
         .header("Accept", "application/json")
         .header("Content-Type", "application/json")
         .json(&serde_json::json!({
@@ -280,7 +282,7 @@ pub async fn verify_license(state: State<'_, Arc<AppState>>) -> Result<bool, Rec
 
     match response {
         Ok(resp) => {
-            if let Ok(body) = resp.json::<LemonSqueezyValidateResponse>().await {
+            if let Ok(body) = resp.json::<PaddleValidateResponse>().await {
                 if !body.valid {
                     // License is no longer valid, clear it
                     tracing::warn!("License validation failed, clearing local license");
@@ -294,7 +296,7 @@ pub async fn verify_license(state: State<'_, Arc<AppState>>) -> Result<bool, Rec
 
                 // Check if license is for our product
                 if let Some(meta) = body.meta {
-                    if meta.product_id != LEMONSQUEEZY_PRODUCT_ID {
+                    if meta.product_id != PADDLE_PRODUCT_ID {
                         return Ok(false);
                     }
                 }
