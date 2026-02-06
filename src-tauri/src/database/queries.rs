@@ -12,7 +12,12 @@ fn normalize_path(path: &str) -> String {
 
     // Try to canonicalize (resolve symlinks, normalize), fall back to string normalization
     match path_obj.canonicalize() {
-        Ok(canonical) => canonical.to_string_lossy().to_string(),
+        Ok(canonical) => {
+            let s = canonical.to_string_lossy().to_string();
+            // Strip Windows extended-length path prefix (\\?\) for consistency
+            // canonicalize() on Windows adds this prefix, but paths are stored without it
+            s.strip_prefix("\\\\?\\").unwrap_or(&s).to_string()
+        }
         Err(_) => {
             // Fallback: just normalize separators
             path.replace('/', "\\").replace("\\\\", "\\")

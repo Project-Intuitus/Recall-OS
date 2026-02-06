@@ -37,6 +37,7 @@ export function useDeleteDocument() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["documents"] });
       queryClient.invalidateQueries({ queryKey: ["stats"] });
+      queryClient.invalidateQueries({ queryKey: ["license-status"] });
     },
     onError: (error) => {
       console.error("Failed to delete document:", error);
@@ -62,6 +63,7 @@ export function useIngestFile() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["documents"] });
       queryClient.invalidateQueries({ queryKey: ["stats"] });
+      queryClient.invalidateQueries({ queryKey: ["license-status"] });
     },
     onError: (error) => {
       console.error("Failed to ingest file:", error);
@@ -78,6 +80,7 @@ export function useIngestDirectory() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["documents"] });
       queryClient.invalidateQueries({ queryKey: ["stats"] });
+      queryClient.invalidateQueries({ queryKey: ["license-status"] });
     },
     onError: (error) => {
       console.error("Failed to ingest directory:", error);
@@ -93,6 +96,7 @@ export function useReingestDocument() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["documents"] });
       queryClient.invalidateQueries({ queryKey: ["stats"] });
+      queryClient.invalidateQueries({ queryKey: ["license-status"] });
     },
     onError: (error) => {
       console.error("Failed to reingest document:", error);
@@ -111,6 +115,7 @@ export function useResetDatabase() {
       queryClient.invalidateQueries({ queryKey: ["chunks"] });
       queryClient.invalidateQueries({ queryKey: ["watcher-status"] });
       queryClient.invalidateQueries({ queryKey: ["settings"] });
+      queryClient.invalidateQueries({ queryKey: ["license-status"] });
     },
     onError: (error) => {
       console.error("Failed to reset database:", error);

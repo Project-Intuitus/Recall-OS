@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { X, Key, Loader2, CheckCircle, AlertCircle, Shield, ExternalLink } from "lucide-react";
+import { X, Key, Loader2, CheckCircle, AlertCircle, Shield, ExternalLink, Clock } from "lucide-react";
+import { open as shellOpen } from "@tauri-apps/plugin-shell";
 import { useLicenseStatus, useActivateLicense, useDeactivateLicense, useActivateTestLicense } from "../hooks/useLicense";
 import clsx from "clsx";
 
@@ -150,8 +151,8 @@ export default function LicenseModal({ onClose }: LicenseModalProps) {
                   <span className="font-medium">Trial Mode</span>
                 </div>
                 <p className="text-sm text-slate-400 mt-2">
-                  You&apos;re using RECALL.OS in trial mode. Purchase a license
-                  to unlock unlimited documents.
+                  You&apos;re using RECALL.OS in trial mode with up to 25 documents.
+                  All features are included.
                 </p>
                 {licenseStatus && licenseStatus.documents_used !== null && licenseStatus.documents_limit !== null && (
                   <div className="mt-3 pt-3 border-t border-amber-500/20">
@@ -180,7 +181,7 @@ export default function LicenseModal({ onClose }: LicenseModalProps) {
                     </div>
                     {(licenseStatus.documents_used ?? 0) >= (licenseStatus.documents_limit ?? 1) && (
                       <p className="text-xs text-red-400 mt-2">
-                        Trial limit reached. Upgrade to add more documents.
+                        Trial limit reached. Licensing coming soon — join the waitlist for updates.
                       </p>
                     )}
                   </div>
@@ -243,17 +244,29 @@ export default function LicenseModal({ onClose }: LicenseModalProps) {
                 </div>
               )}
 
-              {/* Purchase link */}
-              <div className="text-center pt-2">
-                <a
-                  href="https://projectintuitus.lemonsqueezy.com/checkout/buy/7f77499e-81dc-4284-a288-eab6aa8d76cb"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1 text-sm text-blue-400 hover:underline"
+              {/* Coming Soon notice */}
+              <div className="bg-slate-700/50 border border-slate-600 rounded-lg p-4">
+                <div className="flex items-center gap-2 text-slate-300 mb-2">
+                  <Clock className="w-4 h-4 text-cyan-400" />
+                  <span className="font-medium text-sm">Licensing Coming Soon</span>
+                </div>
+                <p className="text-xs text-slate-400 mb-3">
+                  License purchasing is not yet available. Join the waitlist to get notified when it launches — $29.99 one-time for unlimited documents.
+                </p>
+                <button
+                  onClick={() => shellOpen("https://projectintuitus.com/#waitlist")}
+                  className={clsx(
+                    "w-full py-2.5 rounded-lg font-medium text-center",
+                    "bg-gradient-to-r from-cyan-500 to-blue-600 text-white",
+                    "hover:from-cyan-400 hover:to-blue-500 transition-all",
+                    "shadow-lg shadow-cyan-500/20"
+                  )}
                 >
-                  Purchase a license
-                  <ExternalLink className="w-3 h-3" />
-                </a>
+                  <span className="inline-flex items-center gap-2">
+                    Join the Waitlist
+                    <ExternalLink className="w-4 h-4" />
+                  </span>
+                </button>
               </div>
             </div>
           )}

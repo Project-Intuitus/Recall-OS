@@ -322,7 +322,7 @@ impl IngestionEngine {
 
                 // Create progress callback that updates the UI
                 let doc_id = doc.id.clone();
-                let path_for_cb = path_str.clone();
+                let _path_for_cb = path_str.clone();
                 let progress_map = self.progress.clone();
                 let app_handle_for_cb = app_handle.clone();
 

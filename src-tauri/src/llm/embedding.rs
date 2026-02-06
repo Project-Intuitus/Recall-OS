@@ -8,6 +8,8 @@ const EMBEDDING_API_URL: &str = "https://generativelanguage.googleapis.com/v1bet
 struct EmbedRequest {
     model: String,
     content: EmbedContent,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    output_dimensionality: Option<u32>,
 }
 
 #[derive(Debug, Serialize)]
@@ -29,6 +31,8 @@ struct BatchEmbedRequest {
 struct EmbedContentRequest {
     model: String,
     content: EmbedContent,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    output_dimensionality: Option<u32>,
 }
 
 #[derive(Debug, Deserialize)]
@@ -75,6 +79,7 @@ impl EmbeddingClient {
                     text: text.to_string(),
                 }],
             },
+            output_dimensionality: Some(768),
         };
 
         let response = self
@@ -125,6 +130,7 @@ impl EmbeddingClient {
                     content: EmbedContent {
                         parts: vec![EmbedPart { text: text.clone() }],
                     },
+                    output_dimensionality: Some(768),
                 })
                 .collect();
 

@@ -81,7 +81,7 @@ impl Default for Settings {
     fn default() -> Self {
         Self {
             gemini_api_key: None,
-            embedding_model: "text-embedding-004".to_string(),
+            embedding_model: "gemini-embedding-001".to_string(),
             ingestion_model: "gemini-2.0-flash".to_string(),
             reasoning_model: "gemini-2.0-flash".to_string(),
             chunk_size: 512,
@@ -191,6 +191,12 @@ impl AppState {
         } else {
             Settings::default()
         };
+
+        // Migrate deprecated embedding model
+        if settings.embedding_model == "text-embedding-004" {
+            tracing::info!("Migrating embedding model from text-embedding-004 to gemini-embedding-001");
+            settings.embedding_model = "gemini-embedding-001".to_string();
+        }
 
         // Check for API key from environment variable (for development)
         if settings.gemini_api_key.is_none() {

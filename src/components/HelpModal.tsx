@@ -1,12 +1,13 @@
 import { useState } from "react";
-import { X, BookOpen, FileText, MessageSquare, Camera, Key, Settings2 } from "lucide-react";
+import { X, BookOpen, FileText, MessageSquare, Camera, Key, Settings2, Users, ExternalLink, Star, Github } from "lucide-react";
+import { open as shellOpen } from "@tauri-apps/plugin-shell";
 import clsx from "clsx";
 
 interface HelpModalProps {
   onClose: () => void;
 }
 
-type TabId = "getting-started" | "documents" | "chat" | "capture" | "api-key" | "advanced";
+type TabId = "getting-started" | "documents" | "chat" | "capture" | "api-key" | "advanced" | "community";
 
 interface Tab {
   id: TabId;
@@ -21,6 +22,7 @@ const tabs: Tab[] = [
   { id: "capture", label: "Screen Capture", icon: <Camera className="w-4 h-4" /> },
   { id: "api-key", label: "API Key Setup", icon: <Key className="w-4 h-4" /> },
   { id: "advanced", label: "Advanced Settings", icon: <Settings2 className="w-4 h-4" /> },
+  { id: "community", label: "Community", icon: <Users className="w-4 h-4" /> },
 ];
 
 export default function HelpModal({ onClose }: HelpModalProps) {
@@ -68,6 +70,7 @@ export default function HelpModal({ onClose }: HelpModalProps) {
             {activeTab === "capture" && <CaptureContent />}
             {activeTab === "api-key" && <ApiKeyContent />}
             {activeTab === "advanced" && <AdvancedSettingsContent />}
+            {activeTab === "community" && <CommunityContent />}
           </div>
         </div>
       </div>
@@ -306,6 +309,87 @@ function ApiKeyContent() {
         <h4 className="font-medium text-white mb-2">Security</h4>
         <p className="text-sm text-slate-300">
           Your API key is stored locally and is never shared. All API calls go directly from your device to Google's servers.
+        </p>
+      </div>
+    </div>
+  );
+}
+
+function CommunityContent() {
+  const openLink = (url: string) => {
+    shellOpen(url);
+  };
+
+  return (
+    <div className="space-y-4">
+      <h3 className="text-xl font-semibold text-blue-400">Community & Links</h3>
+      <p className="text-slate-300">
+        Connect with the RECALL.OS community, get support, and stay updated.
+      </p>
+
+      <div className="space-y-2">
+        <button
+          onClick={() => openLink("https://github.com/Project-Intuitus/Recall-OS")}
+          className="flex items-center gap-3 w-full p-3 bg-slate-700/50 hover:bg-slate-700 rounded-lg transition-colors text-left"
+        >
+          <Github className="w-5 h-5 text-slate-300 flex-shrink-0" />
+          <div className="flex-1">
+            <div className="font-medium text-white text-sm">GitHub</div>
+            <div className="text-xs text-slate-400">Source code, issues, and discussions</div>
+          </div>
+          <Star className="w-4 h-4 text-amber-400" />
+        </button>
+
+        <button
+          onClick={() => openLink("https://projectintuitus.com/blog")}
+          className="flex items-center gap-3 w-full p-3 bg-slate-700/50 hover:bg-slate-700 rounded-lg transition-colors text-left"
+        >
+          <BookOpen className="w-5 h-5 text-cyan-400 flex-shrink-0" />
+          <div className="flex-1">
+            <div className="font-medium text-white text-sm">Blog</div>
+            <div className="text-xs text-slate-400">Articles on local-first AI and privacy</div>
+          </div>
+          <ExternalLink className="w-3.5 h-3.5 text-slate-500" />
+        </button>
+
+        <button
+          onClick={() => openLink("https://projectintuitus.com/recallos")}
+          className="flex items-center gap-3 w-full p-3 bg-slate-700/50 hover:bg-slate-700 rounded-lg transition-colors text-left"
+        >
+          <ExternalLink className="w-5 h-5 text-blue-400 flex-shrink-0" />
+          <div className="flex-1">
+            <div className="font-medium text-white text-sm">Website</div>
+            <div className="text-xs text-slate-400">Product page and downloads</div>
+          </div>
+          <ExternalLink className="w-3.5 h-3.5 text-slate-500" />
+        </button>
+      </div>
+
+      <div className="bg-slate-700/50 rounded-lg p-4 mt-4">
+        <h4 className="font-medium text-white mb-2">Share RECALL.OS</h4>
+        <p className="text-sm text-slate-300 mb-3">
+          Know someone who manages lots of documents? Share this link:
+        </p>
+        <div className="flex items-center gap-2">
+          <code className="flex-1 bg-slate-800 px-3 py-2 rounded text-sm text-cyan-400 truncate">
+            https://projectintuitus.com/recallos
+          </code>
+          <button
+            onClick={() => navigator.clipboard.writeText("https://projectintuitus.com/recallos")}
+            className="px-3 py-2 bg-slate-600 hover:bg-slate-500 rounded text-xs font-medium transition-colors"
+          >
+            Copy
+          </button>
+        </div>
+      </div>
+
+      <div className="bg-amber-500/10 border border-amber-500/20 rounded-lg p-4">
+        <h4 className="font-medium text-amber-400 mb-2 flex items-center gap-2">
+          <Star className="w-4 h-4" />
+          Star us on GitHub
+        </h4>
+        <p className="text-sm text-slate-300">
+          If RECALL.OS is useful to you, consider starring the repo on GitHub. It helps others discover the project and motivates development.
         </p>
       </div>
     </div>

@@ -1015,25 +1015,44 @@ export default function Sidebar({
             isLicensed ? "text-green-400" : "text-amber-400"
           )} />
           {isExpanded && (
-            <div className="flex-1 flex items-center justify-between">
-              <span className="flex items-center gap-2">
-                License
-                <span className={clsx(
-                  "text-xs px-1.5 py-0.5 rounded",
-                  isLicensed
-                    ? "bg-green-500/20 text-green-400"
-                    : "bg-amber-500/20 text-amber-400"
-                )}>
-                  {isLicensed ? "Active" : "Trial"}
+            <div className="flex-1">
+              <div className="flex items-center justify-between">
+                <span className="flex items-center gap-2">
+                  License
+                  <span className={clsx(
+                    "text-xs px-1.5 py-0.5 rounded",
+                    isLicensed
+                      ? "bg-green-500/20 text-green-400"
+                      : "bg-amber-500/20 text-amber-400"
+                  )}>
+                    {isLicensed ? "Active" : "Trial"}
+                  </span>
                 </span>
-              </span>
+                {!isLicensed && trialDocsUsed !== undefined && trialDocsLimit !== undefined && (
+                  <span className={clsx(
+                    "text-xs",
+                    trialDocsUsed >= trialDocsLimit ? "text-red-400" : "text-slate-400"
+                  )}>
+                    {trialDocsUsed}/{trialDocsLimit}
+                  </span>
+                )}
+              </div>
               {!isLicensed && trialDocsUsed !== undefined && trialDocsLimit !== undefined && (
-                <span className={clsx(
-                  "text-xs",
-                  trialDocsUsed >= trialDocsLimit ? "text-red-400" : "text-slate-400"
-                )}>
-                  {trialDocsUsed}/{trialDocsLimit}
-                </span>
+                <div className="mt-1.5 w-full bg-slate-700 rounded-full h-1.5">
+                  <div
+                    className={clsx(
+                      "h-1.5 rounded-full transition-all duration-300",
+                      trialDocsUsed >= trialDocsLimit
+                        ? "bg-red-500"
+                        : trialDocsUsed >= trialDocsLimit * 0.8
+                        ? "bg-amber-500"
+                        : "bg-cyan-500"
+                    )}
+                    style={{
+                      width: `${Math.min(100, (trialDocsUsed / trialDocsLimit) * 100)}%`
+                    }}
+                  />
+                </div>
               )}
             </div>
           )}

@@ -42,7 +42,7 @@ impl LlmClient {
 
         Self {
             client,
-            embedding_client: EmbeddingClient::new(api_key.clone(), "text-embedding-004".to_string()),
+            embedding_client: EmbeddingClient::new(api_key.clone(), "gemini-embedding-001".to_string()),
             api_key,
             rate_limiter: Arc::new(RateLimiter::new(60)), // 60 RPM default
         }

@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect, useCallback } from "react";
-import { Send, Loader2, AlertCircle, Sparkles } from "lucide-react";
+import { Send, Loader2, AlertCircle, Sparkles, Copy, Check } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import rehypeSanitize from "rehype-sanitize";
 import { useQueryWithSources } from "../hooks/useRag";
@@ -33,6 +33,7 @@ export default function ChatPanel({
 }: ChatPanelProps) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
+  const [copiedMessageId, setCopiedMessageId] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   // Ref to prevent double-submit from rapid clicks
@@ -135,6 +136,13 @@ export default function ChatPanel({
     }
   };
 
+  const handleCopyWithAttribution = useCallback((message: Message) => {
+    const text = `${message.content}\n\n— Generated with RECALL.OS (projectintuitus.com)`;
+    navigator.clipboard.writeText(text);
+    setCopiedMessageId(message.id);
+    setTimeout(() => setCopiedMessageId(null), 2000);
+  }, []);
+
   const renderMessage = (message: Message) => {
     if (message.role === "user") {
       return (
@@ -173,6 +181,27 @@ export default function ChatPanel({
               </div>
             </div>
           )}
+
+          {/* Copy with attribution */}
+          <div className="mt-2 pt-2 border-t border-slate-700/30 flex justify-end">
+            <button
+              onClick={() => handleCopyWithAttribution(message)}
+              className="flex items-center gap-1.5 text-xs text-slate-500 hover:text-slate-300 transition-colors px-2 py-1 rounded hover:bg-slate-700/50"
+              title="Copy answer with attribution"
+            >
+              {copiedMessageId === message.id ? (
+                <>
+                  <Check className="w-3 h-3 text-green-400" />
+                  <span className="text-green-400">Copied</span>
+                </>
+              ) : (
+                <>
+                  <Copy className="w-3 h-3" />
+                  <span>Copy</span>
+                </>
+              )}
+            </button>
+          </div>
         </div>
       </div>
     );

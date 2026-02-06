@@ -37,6 +37,7 @@ impl Default for LicenseTier {
 
 /// LemonSqueezy API response structures
 #[derive(Debug, Deserialize)]
+#[allow(dead_code)]
 struct LemonSqueezyValidateResponse {
     valid: bool,
     error: Option<String>,
@@ -45,6 +46,7 @@ struct LemonSqueezyValidateResponse {
 }
 
 #[derive(Debug, Deserialize)]
+#[allow(dead_code)]
 struct LemonSqueezyLicenseKey {
     id: u64,
     status: String,
@@ -55,6 +57,7 @@ struct LemonSqueezyLicenseKey {
 }
 
 #[derive(Debug, Deserialize)]
+#[allow(dead_code)]
 struct LemonSqueezyMeta {
     product_id: u64,
     product_name: String,
@@ -64,6 +67,7 @@ struct LemonSqueezyMeta {
 }
 
 #[derive(Debug, Deserialize)]
+#[allow(dead_code)]
 struct LemonSqueezyActivateResponse {
     activated: bool,
     error: Option<String>,
@@ -73,12 +77,14 @@ struct LemonSqueezyActivateResponse {
 }
 
 #[derive(Debug, Deserialize)]
+#[allow(dead_code)]
 struct LemonSqueezyDeactivateResponse {
     deactivated: bool,
     error: Option<String>,
 }
 
 #[derive(Debug, Deserialize)]
+#[allow(dead_code)]
 struct LemonSqueezyInstance {
     id: String,
     name: String,
@@ -151,7 +157,7 @@ pub async fn activate_license(
         .await
         .map_err(|e| RecallError::Other(format!("Failed to connect to license server: {}", e)))?;
 
-    let status = response.status();
+    let _status = response.status();
     let body: LemonSqueezyActivateResponse = response
         .json()
         .await
