@@ -1,6 +1,6 @@
 {
   "name": "recall-os",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Project Mnemosyne - Local-first AI-powered document retrieval and RAG system",
   "type": "module",
   "scripts": {
