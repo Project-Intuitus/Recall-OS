@@ -3,7 +3,7 @@ use crate::error::RecallError;
 use crate::state::AppState;
 use std::path::PathBuf;
 use std::sync::Arc;
-use tauri::{AppHandle, Runtime, State};
+use tauri::{AppHandle, Emitter, Runtime, State};
 use walkdir::WalkDir;
 
 #[derive(serde::Serialize)]
@@ -129,6 +129,11 @@ pub async fn add_watched_folder<R: Runtime>(
                 Ok(doc) => {
                     tracing::info!("Initial scan: ingested {}", doc.title);
                     ingested_count += 1;
+                }
+                Err(RecallError::TrialLimitReached(msg)) => {
+                    tracing::warn!("Initial scan: trial limit reached — {}", msg);
+                    let _ = app_handle_clone.emit("trial-limit-reached", &msg);
+                    break;
                 }
                 Err(e) => {
                     tracing::error!("Initial scan: failed to ingest {:?}: {}", file_path, e);

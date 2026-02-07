@@ -7,67 +7,12 @@ use std::sync::Arc;
 use tauri::{AppHandle, State};
 use walkdir::WalkDir;
 
-/// Maximum documents allowed in trial mode
-const TRIAL_DOCUMENT_LIMIT: usize = 25;
-
-/// Check if user can add more documents (license check)
-fn check_document_limit(state: &AppState) -> Result<(), RecallError> {
-    let settings = state.settings.read();
-
-    // Check if licensed
-    if let Some(ref key) = settings.license_key {
-        // Simple format validation - licensed users have no limit
-        if key.starts_with("RO-") && key.len() == 17 {
-            return Ok(());
-        }
-    }
-
-    // Trial user - check document count
-    drop(settings);
-    let stats = state.database.get_ingestion_stats()?;
-
-    if stats.total_documents >= TRIAL_DOCUMENT_LIMIT as i64 {
-        return Err(RecallError::Other(format!(
-            "Trial limit reached: {} documents. Upgrade to a license for unlimited documents.",
-            TRIAL_DOCUMENT_LIMIT
-        )));
-    }
-
-    Ok(())
-}
-
-/// Get remaining document slots for trial users (None = unlimited for licensed)
-fn get_remaining_document_slots(state: &AppState) -> Result<Option<usize>, RecallError> {
-    let settings = state.settings.read();
-
-    // Check if licensed
-    if let Some(ref key) = settings.license_key {
-        if key.starts_with("RO-") && key.len() == 17 {
-            return Ok(None); // Unlimited
-        }
-    }
-
-    // Trial user - calculate remaining
-    drop(settings);
-    let stats = state.database.get_ingestion_stats()?;
-    let current = stats.total_documents as usize;
-
-    if current >= TRIAL_DOCUMENT_LIMIT {
-        Ok(Some(0))
-    } else {
-        Ok(Some(TRIAL_DOCUMENT_LIMIT - current))
-    }
-}
-
 #[tauri::command]
 pub async fn ingest_file(
     state: State<'_, Arc<AppState>>,
     app_handle: AppHandle,
     path: String,
 ) -> Result<Document, RecallError> {
-    // Check trial document limit
-    check_document_limit(&state)?;
-
     let path = PathBuf::from(path);
 
     if !path.exists() {
@@ -77,6 +22,7 @@ pub async fn ingest_file(
         )));
     }
 
+    // Trial limit is enforced inside IngestionEngine::ingest_file()
     state.ingestion_engine.ingest_file(&path, &app_handle).await
 }
 
@@ -96,9 +42,6 @@ pub async fn ingest_directory(
         )));
     }
 
-    // Check trial limit and get remaining slots
-    let remaining_slots = get_remaining_document_slots(&state)?;
-
     let recursive = recursive.unwrap_or(true);
     let mut documents = Vec::new();
     let mut errors = Vec::new();
@@ -110,17 +53,6 @@ pub async fn ingest_directory(
     };
 
     for entry in walker.into_iter().filter_map(|e| e.ok()) {
-        // Check if we've hit the trial limit
-        if let Some(slots) = remaining_slots {
-            if documents.len() >= slots {
-                errors.push(format!(
-                    "Trial limit reached after {} documents. Upgrade for unlimited.",
-                    documents.len()
-                ));
-                break;
-            }
-        }
-
         if entry.file_type().is_file() {
             let file_path = entry.path();
 
@@ -141,12 +73,18 @@ pub async fn ingest_directory(
                 continue;
             }
 
+            // Trial limit is enforced inside IngestionEngine::ingest_file()
             match state
                 .ingestion_engine
                 .ingest_file(file_path, &app_handle)
                 .await
             {
                 Ok(doc) => documents.push(doc),
+                Err(RecallError::TrialLimitReached(msg)) => {
+                    tracing::warn!("Trial limit reached during directory ingest: {}", msg);
+                    errors.push(msg);
+                    break;
+                }
                 Err(e) => {
                     tracing::error!("Failed to ingest {:?}: {}", file_path, e);
                     errors.push(format!("{}: {}", file_path.display(), e));

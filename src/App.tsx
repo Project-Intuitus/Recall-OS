@@ -14,7 +14,7 @@ import type { Citation, SourceChunk, IngestionProgress, Document } from "./types
 
 interface Toast {
   id: string;
-  type: "info" | "success" | "error";
+  type: "info" | "success" | "error" | "warning";
   message: string;
 }
 
@@ -83,11 +83,13 @@ function App() {
       // Refresh documents list immediately when a file is auto-ingested
       queryClient.invalidateQueries({ queryKey: ["documents"] });
       queryClient.invalidateQueries({ queryKey: ["stats"] });
+      queryClient.invalidateQueries({ queryKey: ["license-status"] });
     });
 
     const unlistenDeleted = listen<string>("document-deleted", () => {
       queryClient.invalidateQueries({ queryKey: ["documents"] });
       queryClient.invalidateQueries({ queryKey: ["stats"] });
+      queryClient.invalidateQueries({ queryKey: ["license-status"] });
     });
 
     // Listen for capture events with toast notifications
@@ -100,6 +102,7 @@ function App() {
       // Refresh documents list when a capture is fully processed (OCR complete)
       queryClient.invalidateQueries({ queryKey: ["documents"] });
       queryClient.invalidateQueries({ queryKey: ["stats"] });
+      queryClient.invalidateQueries({ queryKey: ["license-status"] });
       // Remove processing toast and show success
       if (processingToastId) {
         removeToast(processingToastId);
@@ -128,12 +131,18 @@ function App() {
       addToast("error", `Capture failed: ${event.payload.error}`);
     });
 
+    const unlistenTrialLimit = listen<string>("trial-limit-reached", () => {
+      queryClient.invalidateQueries({ queryKey: ["license-status"] });
+      addToast("warning", "Trial limit reached (25 documents). Upgrade for unlimited.");
+    });
+
     return () => {
       unlistenComplete.then((fn) => fn());
       unlistenDeleted.then((fn) => fn());
       unlistenCaptureComplete.then((fn) => fn());
       unlistenCaptureStarted.then((fn) => fn());
       unlistenCaptureError.then((fn) => fn());
+      unlistenTrialLimit.then((fn) => fn());
     };
   }, [queryClient]);
 
@@ -157,12 +166,19 @@ function App() {
         }
         return [...prev, event.payload];
       });
+
+      // Refresh document count when ingestion completes (covers folder scan path)
+      if (event.payload.stage === "completed") {
+        queryClient.invalidateQueries({ queryKey: ["documents"] });
+        queryClient.invalidateQueries({ queryKey: ["stats"] });
+        queryClient.invalidateQueries({ queryKey: ["license-status"] });
+      }
     });
 
     return () => {
       unlisten.then((fn) => fn());
     };
-  }, []);
+  }, [queryClient]);
 
   // Listen for ingestion progress cleared event (database reset)
   useEffect(() => {
@@ -298,6 +314,8 @@ function App() {
                   ? "bg-emerald-500/20 border-emerald-500/30 text-emerald-300"
                   : toast.type === "error"
                   ? "bg-red-500/20 border-red-500/30 text-red-300"
+                  : toast.type === "warning"
+                  ? "bg-amber-500/20 border-amber-500/30 text-amber-300"
                   : "bg-cyan-500/20 border-cyan-500/30 text-cyan-300"
               }`}
             >
@@ -306,6 +324,8 @@ function App() {
                   ? "bg-emerald-400 shadow-lg shadow-emerald-400/50"
                   : toast.type === "error"
                   ? "bg-red-400 shadow-lg shadow-red-400/50"
+                  : toast.type === "warning"
+                  ? "bg-amber-400 shadow-lg shadow-amber-400/50"
                   : "bg-cyan-400 shadow-lg shadow-cyan-400/50"
               }`} />
               <span className="text-sm font-medium">{toast.message}</span>

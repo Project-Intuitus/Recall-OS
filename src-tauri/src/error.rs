@@ -50,6 +50,9 @@ pub enum RecallError {
     #[error("Screen capture error: {0}")]
     Capture(String),
 
+    #[error("Trial limit reached: {0}")]
+    TrialLimitReached(String),
+
     #[error("Not found: {0}")]
     NotFound(String),
 

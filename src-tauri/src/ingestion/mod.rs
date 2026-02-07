@@ -12,6 +12,7 @@ pub use ffmpeg::*;
 pub use watcher::*;
 pub use watcher_manager::*;
 
+use crate::commands::license::TRIAL_DOCUMENT_LIMIT;
 use crate::database::{Database, Document, DocumentStatus, FileType, IngestionProgress, IngestionStage};
 use crate::llm::LlmProvider;
 use crate::error::{RecallError, Result};
@@ -87,6 +88,32 @@ impl IngestionEngine {
         self.pending_queue.read().clone()
     }
 
+    /// Check if the trial document limit has been reached.
+    /// Licensed users bypass this check entirely.
+    fn check_trial_limit(&self) -> Result<()> {
+        let settings = self.settings.read();
+
+        // Licensed users have no limit
+        if let Some(ref key) = settings.license_key {
+            if key.starts_with("RO-") && key.len() == 17 {
+                return Ok(());
+            }
+        }
+
+        // Trial user — check document count
+        drop(settings);
+        let stats = self.database.get_ingestion_stats()?;
+
+        if stats.total_documents >= TRIAL_DOCUMENT_LIMIT as i64 {
+            return Err(RecallError::TrialLimitReached(format!(
+                "Trial limit reached: {} documents. Upgrade to a license for unlimited documents.",
+                TRIAL_DOCUMENT_LIMIT
+            )));
+        }
+
+        Ok(())
+    }
+
     pub async fn ingest_file<R: tauri::Runtime>(
         &self,
         path: &Path,
@@ -130,6 +157,9 @@ impl IngestionEngine {
                     .ok_or_else(|| RecallError::NotFound("Document not found after path update".to_string()));
             }
         }
+
+        // Check trial document limit before creating a new document
+        self.check_trial_limit()?;
 
         // Create document record
         let doc = self.create_document(path)?;

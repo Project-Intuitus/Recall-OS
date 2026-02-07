@@ -1,5 +1,5 @@
 use crate::database::Database;
-use crate::error::Result;
+use crate::error::{RecallError, Result};
 use crate::ingestion::{FileWatcher, IngestionEngine, WatchEvent};
 use parking_lot::RwLock;
 use std::collections::{HashSet, HashMap};
@@ -185,6 +185,10 @@ impl WatcherManager {
                         Ok(doc) => {
                             tracing::info!("Auto-ingested successfully: {}", doc.title);
                             let _ = app_handle.emit("auto-ingest-complete", &doc);
+                        }
+                        Err(RecallError::TrialLimitReached(msg)) => {
+                            tracing::warn!("Auto-ingest: trial limit reached — {}", msg);
+                            let _ = app_handle.emit("trial-limit-reached", &msg);
                         }
                         Err(e) => {
                             tracing::error!("Auto-ingest failed for {:?}: {}", path, e);
