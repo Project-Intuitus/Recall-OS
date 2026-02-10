@@ -1,6 +1,6 @@
 [package]
 name = "recall-os"
-version = "1.0.5"
+version = "1.0.6"
 description = "Project Mnemosyne - Local-first AI-powered document retrieval and RAG system"
 authors = ["Recall.OS Team"]
 edition = "2021"

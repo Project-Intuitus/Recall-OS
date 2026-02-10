@@ -172,7 +172,7 @@ async function createSidebarImage() {
       <rect x="${width / 2 - 25}" y="175" width="50" height="18" rx="9" fill="${COLORS.accent}" opacity="0.2"/>
       <rect x="${width / 2 - 25}" y="175" width="50" height="18" rx="9" stroke="${COLORS.accent}" stroke-width="1" fill="none" opacity="0.5"/>
       <text x="${width / 2}" y="188" text-anchor="middle" font-family="Segoe UI, Arial, sans-serif" font-size="9" font-weight="600" fill="${COLORS.accent}">
-        v1.0.5
+        v1.0.6
       </text>
 
       <!-- Bottom text -->
