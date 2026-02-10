@@ -1,6 +1,6 @@
 ---
 name: Feature Request
-about: Suggest a feature or improvement for RECALL.OS
+about: Suggest a feature or improvement for Recall.OS
 title: "[Feature] "
 labels: enhancement
 assignees: ''

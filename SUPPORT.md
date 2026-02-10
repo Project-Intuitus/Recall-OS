@@ -2,7 +2,7 @@
 
 # Support
 
-Need help with RECALL.OS? You're in the right place.
+Need help with Recall.OS? You're in the right place.
 
 </div>
 
@@ -86,7 +86,7 @@ Start with the [README](README.md) for setup instructions and feature overview.
 
 Open a [GitHub Issue](https://github.com/Project-Intuitus/Recall-OS/issues/new) with:
 
-- **RECALL.OS version** (Settings → About)
+- **Recall.OS version** (Settings → About)
 - **Windows version** (e.g., Windows 11 22H2)
 - **Display scaling** (e.g., 150%)
 - **Steps to reproduce**

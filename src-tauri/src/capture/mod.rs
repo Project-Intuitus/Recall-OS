@@ -1,4 +1,4 @@
-//! Screen capture module for RECALL.OS
+//! Screen capture module for Recall.OS
 //!
 //! Provides functionality for:
 //! - On-demand screenshot capture (button/hotkey)

@@ -27,7 +27,7 @@ npm run build
 
 ## Architecture Overview
 
-RECALL.OS is a Tauri v2 desktop app with a Rust backend and React 19 frontend. It provides local-first document ingestion, hybrid search (vector + FTS), and RAG-powered Q&A using the Gemini API (BYOK model).
+Recall.OS is a Tauri v2 desktop app with a Rust backend and React 19 frontend. It provides local-first document ingestion, hybrid search (vector + FTS), and RAG-powered Q&A using the Gemini API (BYOK model).
 
 ### Frontend-Backend Communication
 
@@ -43,15 +43,18 @@ Backend emits events to frontend via `app_handle.emit()`:
 - `"ingestion-progress"` - real-time ingestion status updates
 - `"auto-ingest-complete"` - when file watcher completes auto-ingestion
 - `"document-deleted"` - when a document is removed
+- `"trial-limit-reached"` - when trial user hits 25-document limit during sync/auto-ingest
+- `"capture-complete"` / `"capture-started"` / `"capture-error"` - screen capture lifecycle
+- `"related-content-found"` - when similar documents are detected after ingestion
 
-Frontend listens in `App.tsx` via `@tauri-apps/api/event.listen()`.
+Frontend listens in `App.tsx` via `@tauri-apps/api/event.listen()`. Event handlers must invalidate all affected query keys (including `["license-status"]`) to keep the UI in sync.
 
 ### State Management
 
 - **Backend**: `AppState` in `state.rs` holds shared state wrapped in `Arc<RwLock<>>`:
   - `database`, `llm_client`, `ingestion_engine`, `rag_engine`, `settings`, `watcher_manager`
 - **Frontend**: TanStack Query v5 with hooks in `src/hooks/`
-  - Query keys: `["documents"]`, `["stats"]`, `["settings"]`, `["chunks", documentId]`, `["license"]`
+  - Query keys: `["documents"]`, `["stats"]`, `["settings"]`, `["chunks", documentId]`, `["license-status"]`, `["conversations"]`, `["watcher-status"]`
 
 ### Database Layer
 
@@ -96,8 +99,10 @@ Models:
 ### License System (`src-tauri/src/commands/license.rs`)
 
 - License key format: `RO-XXXX-XXXX-XXXX` with checksum validation
-- Trial mode: 25 document limit enforced in `ingestion.rs`
-- License status stored in settings.json
+- Trial mode: 25 document limit enforced in `IngestionEngine::check_trial_limit()` (`ingestion/mod.rs`)
+- The limit is checked inside the engine so **all** ingestion paths are protected (manual upload, directory ingest, folder sync, auto-ingest watcher)
+- `RecallError::TrialLimitReached` variant allows callers to pattern-match and break/emit specific events
+- License status stored in settings.json, validated via Paddle API
 
 ## Key Tauri Commands
 
@@ -117,7 +122,7 @@ Models:
 
 ## Key Patterns
 
-- **Error handling**: `RecallError` enum in `error.rs` implements `Serialize` for Tauri IPC
+- **Error handling**: `RecallError` enum in `error.rs` implements `Serialize` for Tauri IPC. Use specific variants (e.g. `TrialLimitReached`) over generic `Other` when callers need to pattern-match
 - **Tauri permissions**: ACL in `capabilities/default.json`, restricted to minimal permissions
 - **Network**: Only allows `generativelanguage.googleapis.com` in CSP
 - **Async locks**: Use `parking_lot::RwLock` with short critical sections, clone data before `.await`
@@ -132,6 +137,15 @@ Stored in `%APPDATA%/com.recallos.app/settings.json`:
 - `watched_folders`, `auto_ingest_enabled`
 - `embedding_model`, `ingestion_model`, `reasoning_model`
 - `license_key`, `license_activated_at` - license validation
+
+## Release Process
+
+1. Bump version in all three files: `package.json`, `src-tauri/Cargo.toml`, `src-tauri/tauri.conf.json`
+2. Update installer sidebar image (`src-tauri/installer/sidebar.png` and `sidebar.bmp`) — contains version text in a cyan badge that must be updated with each release (use Pillow to edit)
+3. Build with `npm run tauri:build` — produces `src-tauri/target/release/bundle/nsis/Recall.OS_{version}_x64-setup.exe`
+4. Commit, push, create GitHub release with `gh release create v{version}` attaching the `.exe`
+5. Copy installer to Netlify `downloads/` folder and update `recallos.html` version references
+6. Netlify site is deployed manually (drag-and-drop), not via git
 
 ## Custom Notification System
 

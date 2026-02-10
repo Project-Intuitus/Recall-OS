@@ -296,7 +296,7 @@ mod tests {
 
         // Should allow normal windows
         assert!(filter.should_capture("chrome.exe", "GitHub - Google Chrome"));
-        assert!(filter.should_capture("code.exe", "RECALL.OS - Visual Studio Code"));
+        assert!(filter.should_capture("code.exe", "Recall.OS - Visual Studio Code"));
     }
 
     #[test]

@@ -1,6 +1,6 @@
 ---
 name: Bug Report
-about: Report a bug to help us improve RECALL.OS
+about: Report a bug to help us improve Recall.OS
 title: "[Bug] "
 labels: bug
 assignees: ''
@@ -23,7 +23,7 @@ If applicable, add screenshots to help explain your problem.
 
 **Environment:**
 - OS: [e.g. Windows 11]
-- RECALL.OS Version: [e.g. 1.0.1]
+- Recall.OS Version: [e.g. 1.0.1]
 - Display Scaling: [e.g. 100%, 150%]
 
 **Additional context**

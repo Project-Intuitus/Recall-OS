@@ -1,4 +1,4 @@
-; RECALL.OS NSIS Installer Hooks
+; Recall.OS NSIS Installer Hooks
 ; Improves bitmap scaling quality on high-DPI displays
 
 !include "LogicLib.nsh"

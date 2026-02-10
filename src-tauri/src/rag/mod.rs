@@ -204,7 +204,7 @@ impl RagEngine {
     }
 
     fn build_system_prompt(&self) -> String {
-        r#"You are RECALL.OS, an AI assistant that answers questions based on the user's personal knowledge base.
+        r#"You are Recall.OS, an AI assistant that answers questions based on the user's personal knowledge base.
 
 ## Instructions
 

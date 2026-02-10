@@ -137,7 +137,7 @@ export default function ChatPanel({
   };
 
   const handleCopyWithAttribution = useCallback((message: Message) => {
-    const text = `${message.content}\n\n— Generated with RECALL.OS (projectintuitus.com)`;
+    const text = `${message.content}\n\n— Generated with Recall.OS (projectintuitus.com)`;
     navigator.clipboard.writeText(text);
     setCopiedMessageId(message.id);
     setTimeout(() => setCopiedMessageId(null), 2000);
@@ -259,7 +259,7 @@ export default function ChatPanel({
               <Sparkles className="w-14 h-14 mb-4 text-cyan-400 relative z-10" />
             </div>
             <h2 className="text-2xl font-bold text-white mb-2 tracking-tight">
-              Welcome to <span className="text-gradient">RECALL.OS</span>
+              Welcome to <span className="text-gradient">Recall.OS</span>
             </h2>
             <p className="text-center max-w-md text-slate-400 leading-relaxed">
               Ask questions about your documents. I'll search through your

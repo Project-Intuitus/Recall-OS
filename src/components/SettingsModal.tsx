@@ -324,7 +324,7 @@ export default function SettingsModal({ onClose }: SettingsModalProps) {
               <div className="bg-slate-700/50 rounded-lg p-4 text-sm">
                 <h4 className="font-medium mb-2">About BYOK (Bring Your Own Key)</h4>
                 <p className="text-slate-400">
-                  RECALL.OS uses the Gemini API for document processing and question
+                  Recall.OS uses the Gemini API for document processing and question
                   answering. Your API key is stored locally on your device and is
                   never sent to our servers.
                 </p>
@@ -450,7 +450,7 @@ export default function SettingsModal({ onClose }: SettingsModalProps) {
               <div className="bg-slate-700/50 rounded-lg p-4 text-sm">
                 <h4 className="font-medium mb-2">How it works</h4>
                 <p className="text-slate-400">
-                  When auto-import is enabled, RECALL.OS monitors your selected folders
+                  When auto-import is enabled, Recall.OS monitors your selected folders
                   for new or modified files and automatically adds them to your
                   knowledge base.
                 </p>

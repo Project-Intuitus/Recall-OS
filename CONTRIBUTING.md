@@ -1,8 +1,8 @@
 <div align="center">
 
-# Contributing to RECALL.OS
+# Contributing to Recall.OS
 
-Thank you for your interest in contributing to RECALL.OS.
+Thank you for your interest in contributing to Recall.OS.
 
 </div>
 
@@ -26,7 +26,7 @@ By participating in this project, you agree to maintain a respectful and inclusi
 Found a bug? Please open an issue with:
 
 1. **Clear title** — Summarize the issue in one line
-2. **Environment** — Windows version, display scaling, RECALL.OS version
+2. **Environment** — Windows version, display scaling, Recall.OS version
 3. **Steps to reproduce** — Numbered list of actions to trigger the bug
 4. **Expected behavior** — What should happen
 5. **Actual behavior** — What actually happens
@@ -36,7 +36,7 @@ Found a bug? Please open an issue with:
 **Environment:**
 - OS: Windows 11 (22H2)
 - Display Scaling: 150%
-- RECALL.OS Version: 1.0.1
+- Recall.OS Version: 1.0.1
 
 **Steps to Reproduce:**
 1. Open Settings
@@ -183,7 +183,7 @@ Before submitting a PR:
 
 <div align="center">
 
-**Thank you for helping make RECALL.OS better.**
+**Thank you for helping make Recall.OS better.**
 
 *Part of the [Project Intuitus](https://projectintuitus.com) ecosystem*
 

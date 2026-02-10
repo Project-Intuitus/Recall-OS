@@ -1,4 +1,4 @@
-# RECALL.OS - Project Roadmap
+# Recall.OS - Project Roadmap
 
 **Last Updated**: 2026-02-01
 **Version**: 1.0.0
@@ -110,7 +110,7 @@ npm run tauri:build
 
 ### File Structure
 ```
-RECALL.OS/
+Recall.OS/
 ├── src/                          # React frontend
 │   ├── components/
 │   │   ├── SourcePanel.tsx       # Source viewer
@@ -151,7 +151,7 @@ RECALL.OS/
 ```
 RO-XXXX-XXXX-XXXX
 
-- Prefix: "RO" (RECALL.OS)
+- Prefix: "RO" (Recall.OS)
 - Segments: 4 alphanumeric characters each
 - Validation: Local checksum + future API validation
 ```

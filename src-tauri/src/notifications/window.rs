@@ -56,7 +56,7 @@ pub fn show_notification<R: Runtime>(
         &label,
         WebviewUrl::App("index.html?notification=true".into()),
     )
-    .title("RECALL.OS Notification")
+    .title("Recall.OS Notification")
     .inner_size(NOTIFICATION_WIDTH, NOTIFICATION_HEIGHT)
     .position(x, y)
     .decorations(false)

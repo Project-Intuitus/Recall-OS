@@ -2,7 +2,7 @@
 name = "recall-os"
 version = "1.0.5"
 description = "Project Mnemosyne - Local-first AI-powered document retrieval and RAG system"
-authors = ["RECALL.OS Team"]
+authors = ["Recall.OS Team"]
 edition = "2021"
 rust-version = "1.84"
 

@@ -39,7 +39,7 @@ pub async fn notification_window_ready<R: Runtime>(window: Window<R>) -> Result<
 pub async fn test_notification<R: Runtime>(app: AppHandle<R>) -> Result<(), String> {
     let data = NotificationData {
         title: "Test Notification".to_string(),
-        message: "This is a test notification from RECALL.OS!".to_string(),
+        message: "This is a test notification from Recall.OS!".to_string(),
         document_id: None,
         related_documents: None,
     };

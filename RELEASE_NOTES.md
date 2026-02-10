@@ -17,7 +17,7 @@ Quality-of-life fixes and payment provider migration.
 
 ### Installation
 
-1. Download `RECALL.OS_1.0.4_x64-setup.exe` below
+1. Download `Recall.OS_1.0.4_x64-setup.exe` below
 2. Run the installer
 3. Get your API key from [Google AI Studio](https://aistudio.google.com/apikey)
 4. Paste in Settings → Validate → Start indexing

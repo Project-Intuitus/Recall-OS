@@ -14,7 +14,7 @@ use super::AUMID;
 /// `HKEY_CURRENT_USER\Software\Classes\AppUserModelId\com.recallos.app`
 ///
 /// With values:
-/// - DisplayName: "RECALL.OS"
+/// - DisplayName: "Recall.OS"
 /// - IconUri: Path to the app icon
 /// - IconBackgroundColor: Slate-800 color (FF1e293b)
 pub fn ensure_aumid_registered(icon_path: &Path) -> Result<(), Box<dyn std::error::Error>> {
@@ -33,7 +33,7 @@ pub fn ensure_aumid_registered(icon_path: &Path) -> Result<(), Box<dyn std::erro
     };
 
     // Set the display name
-    key.set_value("DisplayName", &"RECALL.OS")?;
+    key.set_value("DisplayName", &"Recall.OS")?;
 
     // Set the icon path (only if the file exists)
     if icon_path.exists() {

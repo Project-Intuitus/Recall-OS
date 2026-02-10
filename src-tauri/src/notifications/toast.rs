@@ -1,4 +1,4 @@
-//! Toast notification builders with RECALL.OS branding.
+//! Toast notification builders with Recall.OS branding.
 
 use std::path::PathBuf;
 
@@ -65,7 +65,7 @@ impl NotificationBuilder {
             .duration(Duration::Short);
 
         if let Some(icon) = self.get_icon() {
-            toast = toast.icon(&icon, IconCrop::Circular, "RECALL.OS");
+            toast = toast.icon(&icon, IconCrop::Circular, "Recall.OS");
         }
 
         toast.show()?;
@@ -86,7 +86,7 @@ impl NotificationBuilder {
             .duration(Duration::Short);
 
         if let Some(icon) = self.get_icon() {
-            toast = toast.icon(&icon, IconCrop::Circular, "RECALL.OS");
+            toast = toast.icon(&icon, IconCrop::Circular, "Recall.OS");
         }
 
         toast.show()?;
@@ -102,7 +102,7 @@ impl NotificationBuilder {
             .duration(Duration::Short);
 
         if let Some(icon) = self.get_icon() {
-            toast = toast.icon(&icon, IconCrop::Circular, "RECALL.OS");
+            toast = toast.icon(&icon, IconCrop::Circular, "Recall.OS");
         }
 
         toast.show()?;
@@ -118,7 +118,7 @@ impl NotificationBuilder {
             .duration(Duration::Short);
 
         if let Some(icon) = self.get_icon() {
-            toast = toast.icon(&icon, IconCrop::Circular, "RECALL.OS");
+            toast = toast.icon(&icon, IconCrop::Circular, "Recall.OS");
         }
 
         toast.show()?;

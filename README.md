@@ -1,8 +1,8 @@
 <div align="center">
 
-<img src="src-tauri/icons/128x128.png" alt="RECALL.OS" width="80">
+<img src="src-tauri/icons/128x128.png" alt="Recall.OS" width="80">
 
-# RECALL.OS
+# Recall.OS
 
 **Personal AI Memory — Own Your Intelligence**
 
@@ -22,7 +22,7 @@
 
 Every "free" AI is a funnel for your data. Every cloud service is a subscription that watches.
 
-**RECALL.OS** is different. It's a sovereign AI tool that runs entirely on your machine, indexes your documents locally, and answers your questions with precise citations — all without your data ever leaving your device.
+**Recall.OS** is different. It's a sovereign AI tool that runs entirely on your machine, indexes your documents locally, and answers your questions with precise citations — all without your data ever leaving your device.
 
 <br>
 
@@ -45,10 +45,10 @@ Ask questions in plain English. Get answers with exact sources — page numbers,
 <td width="50%">
 
 ### 📸 Screen Capture Intelligence
-Capture screenshots with a hotkey. RECALL.OS extracts and indexes the text automatically.
+Capture screenshots with a hotkey. Recall.OS extracts and indexes the text automatically.
 
 ### 📁 Folder Sync
-Point RECALL.OS at your folders. New files are indexed automatically in the background.
+Point Recall.OS at your folders. New files are indexed automatically in the background.
 
 ### 🔒 100% Local & Private
 Your data never leaves your machine. No cloud. No telemetry. No corporate surveillance.
@@ -67,7 +67,7 @@ Get the latest installer from [**Releases**](https://github.com/Project-Intuitus
 
 ### 2. Get Your API Key
 
-RECALL.OS uses a **Bring Your Own Key (BYOK)** model. Get a free API key from [Google AI Studio](https://aistudio.google.com/apikey).
+Recall.OS uses a **Bring Your Own Key (BYOK)** model. Get a free API key from [Google AI Studio](https://aistudio.google.com/apikey).
 
 ### 3. Start Indexing
 
@@ -79,7 +79,7 @@ Drag and drop files, or set up folder sync to automatically index new documents.
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│                        RECALL.OS                                 │
+│                        Recall.OS                                 │
 ├─────────────────────────────────────────────────────────────────┤
 │  Frontend                                                        │
 │  ├── React 19 + TypeScript                                       │

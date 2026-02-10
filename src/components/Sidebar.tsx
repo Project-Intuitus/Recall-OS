@@ -352,7 +352,7 @@ export default function Sidebar({
             </div>
             <div className="flex flex-col">
               <h1 className="text-base font-bold tracking-tight">
-                <span className="text-white">RECALL</span>
+                <span className="text-white">Recall</span>
                 <span className="text-gradient">.OS</span>
               </h1>
               <span className="text-[10px] text-slate-500 -mt-0.5">Personal AI Memory</span>

@@ -151,7 +151,7 @@ export default function LicenseModal({ onClose }: LicenseModalProps) {
                   <span className="font-medium">Trial Mode</span>
                 </div>
                 <p className="text-sm text-slate-400 mt-2">
-                  You&apos;re using RECALL.OS in trial mode with up to 25 documents.
+                  You&apos;re using Recall.OS in trial mode with up to 25 documents.
                   All features are included.
                 </p>
                 {licenseStatus && licenseStatus.documents_used !== null && licenseStatus.documents_limit !== null && (

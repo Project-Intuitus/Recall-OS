@@ -30,7 +30,7 @@ pub fn run() {
         .with(tracing_subscriber::fmt::layer())
         .init();
 
-    tracing::info!("Starting RECALL.OS");
+    tracing::info!("Starting Recall.OS");
 
     tauri::Builder::default()
         .plugin(tauri_plugin_shell::init())
@@ -125,14 +125,14 @@ pub fn run() {
             }
 
             // Set up system tray
-            let show_item = MenuItem::with_id(app, "show", "Show RECALL.OS", true, None::<&str>)?;
+            let show_item = MenuItem::with_id(app, "show", "Show Recall.OS", true, None::<&str>)?;
             let quit_item = MenuItem::with_id(app, "quit", "Exit", true, None::<&str>)?;
             let tray_menu = Menu::with_items(app, &[&show_item, &quit_item])?;
 
             let _tray = TrayIconBuilder::new()
                 .icon(app.default_window_icon().unwrap().clone())
                 .menu(&tray_menu)
-                .tooltip("RECALL.OS")
+                .tooltip("Recall.OS")
                 .on_menu_event(|app, event| {
                     match event.id.as_ref() {
                         "show" => {
@@ -205,7 +205,7 @@ pub fn run() {
 
             app.manage(state);
 
-            tracing::info!("RECALL.OS initialized successfully");
+            tracing::info!("Recall.OS initialized successfully");
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![

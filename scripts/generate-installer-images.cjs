@@ -1,5 +1,5 @@
 /**
- * Generate custom NSIS installer images for RECALL.OS
+ * Generate custom NSIS installer images for Recall.OS
  * Creates branded header and sidebar images in BMP format (required by NSIS)
  */
 
@@ -9,7 +9,7 @@ const fs = require('fs');
 
 const OUTPUT_DIR = path.join(__dirname, '..', 'src-tauri', 'installer');
 
-// RECALL.OS brand colors
+// Recall.OS brand colors
 const COLORS = {
   bg: '#030712',           // Near black
   surface: '#0f172a',      // Dark slate
@@ -105,7 +105,7 @@ async function createHeaderImage() {
 
       <!-- Logo/Text -->
       <text x="12" y="36" font-family="Segoe UI, Arial, sans-serif" font-size="16" font-weight="700" fill="${COLORS.text}">
-        RECALL<tspan fill="${COLORS.accent}">.OS</tspan>
+        Recall<tspan fill="${COLORS.accent}">.OS</tspan>
       </text>
     </svg>
   `;
@@ -157,7 +157,7 @@ async function createSidebarImage() {
 
       <!-- Logo area -->
       <text x="${width / 2}" y="100" text-anchor="middle" font-family="Segoe UI, Arial, sans-serif" font-size="22" font-weight="800" fill="${COLORS.text}">
-        RECALL
+        Recall
       </text>
       <text x="${width / 2}" y="125" text-anchor="middle" font-family="Segoe UI, Arial, sans-serif" font-size="22" font-weight="800" fill="${COLORS.accent}">
         .OS
@@ -197,7 +197,7 @@ async function createSidebarImage() {
 }
 
 async function main() {
-  console.log('Generating RECALL.OS installer images (BMP format)...\n');
+  console.log('Generating Recall.OS installer images (BMP format)...\n');
 
   await createHeaderImage();
   await createSidebarImage();

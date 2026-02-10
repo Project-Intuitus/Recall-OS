@@ -81,9 +81,9 @@ export default function HelpModal({ onClose }: HelpModalProps) {
 function GettingStartedContent() {
   return (
     <div className="space-y-4">
-      <h3 className="text-xl font-semibold text-blue-400">Welcome to RECALL.OS</h3>
+      <h3 className="text-xl font-semibold text-blue-400">Welcome to Recall.OS</h3>
       <p className="text-slate-300">
-        RECALL.OS is a local-first AI-powered document retrieval system. It helps you search and chat with your documents using natural language, with full conversation history and smart document organization.
+        Recall.OS is a local-first AI-powered document retrieval system. It helps you search and chat with your documents using natural language, with full conversation history and smart document organization.
       </p>
 
       <div className="space-y-3">
@@ -188,7 +188,7 @@ function ChatContent() {
       <div className="space-y-3">
         <h4 className="font-medium text-white">How It Works</h4>
         <p className="text-slate-300">
-          RECALL.OS uses hybrid search combining vector similarity and keyword matching to find relevant content in your documents. When you ask a question, it retrieves the most relevant passages and uses AI to generate an answer with citations.
+          Recall.OS uses hybrid search combining vector similarity and keyword matching to find relevant content in your documents. When you ask a question, it retrieves the most relevant passages and uses AI to generate an answer with citations.
         </p>
       </div>
 
@@ -282,14 +282,14 @@ function ApiKeyContent() {
           <li>Sign in with your Google account</li>
           <li>Click "Create API Key"</li>
           <li>Copy the generated key</li>
-          <li>Paste it in RECALL.OS Settings</li>
+          <li>Paste it in Recall.OS Settings</li>
         </ol>
       </div>
 
       <div className="space-y-3">
         <h4 className="font-medium text-white">API Usage</h4>
         <p className="text-slate-300">
-          RECALL.OS uses the Gemini API for:
+          Recall.OS uses the Gemini API for:
         </p>
         <ul className="list-disc list-inside space-y-2 text-slate-300">
           <li>Generating text embeddings for search</li>
@@ -324,7 +324,7 @@ function CommunityContent() {
     <div className="space-y-4">
       <h3 className="text-xl font-semibold text-blue-400">Community & Links</h3>
       <p className="text-slate-300">
-        Connect with the RECALL.OS community, get support, and stay updated.
+        Connect with the Recall.OS community, get support, and stay updated.
       </p>
 
       <div className="space-y-2">
@@ -366,7 +366,7 @@ function CommunityContent() {
       </div>
 
       <div className="bg-slate-700/50 rounded-lg p-4 mt-4">
-        <h4 className="font-medium text-white mb-2">Share RECALL.OS</h4>
+        <h4 className="font-medium text-white mb-2">Share Recall.OS</h4>
         <p className="text-sm text-slate-300 mb-3">
           Know someone who manages lots of documents? Share this link:
         </p>
@@ -389,7 +389,7 @@ function CommunityContent() {
           Star us on GitHub
         </h4>
         <p className="text-sm text-slate-300">
-          If RECALL.OS is useful to you, consider starring the repo on GitHub. It helps others discover the project and motivates development.
+          If Recall.OS is useful to you, consider starring the repo on GitHub. It helps others discover the project and motivates development.
         </p>
       </div>
     </div>
@@ -401,7 +401,7 @@ function AdvancedSettingsContent() {
     <div className="space-y-4">
       <h3 className="text-xl font-semibold text-blue-400">Advanced Settings</h3>
       <p className="text-slate-300">
-        These settings control how RECALL.OS processes and retrieves your documents. The defaults work well for most cases, but you can tune them for specific needs.
+        These settings control how Recall.OS processes and retrieves your documents. The defaults work well for most cases, but you can tune them for specific needs.
       </p>
 
       <div className="space-y-3">
@@ -446,7 +446,7 @@ function AdvancedSettingsContent() {
       <div className="space-y-3">
         <h4 className="font-medium text-white">Video Segment Duration (seconds)</h4>
         <p className="text-slate-300 text-sm">
-          When processing videos, RECALL.OS transcribes the audio in segments. This setting controls segment length.
+          When processing videos, Recall.OS transcribes the audio in segments. This setting controls segment length.
         </p>
         <ul className="list-disc list-inside space-y-1 text-slate-400 text-sm ml-2">
           <li><strong>Default: 300 seconds</strong> (5 minutes) - Good for most videos</li>
@@ -458,7 +458,7 @@ function AdvancedSettingsContent() {
       <div className="space-y-3">
         <h4 className="font-medium text-white">Folder Sync (Auto-Import)</h4>
         <p className="text-slate-300 text-sm">
-          Found in the Sync tab. When enabled, RECALL.OS watches your selected folders and automatically imports new or modified files.
+          Found in the Sync tab. When enabled, Recall.OS watches your selected folders and automatically imports new or modified files.
         </p>
         <ul className="list-disc list-inside space-y-1 text-slate-400 text-sm ml-2">
           <li>Add folders you want to keep synced (e.g., your research folder)</li>

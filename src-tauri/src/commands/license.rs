@@ -7,7 +7,7 @@ use tauri::State;
 /// Maximum documents allowed in trial mode
 pub const TRIAL_DOCUMENT_LIMIT: usize = 25;
 
-/// Paddle Product ID for RECALL.OS (to be updated after Paddle approval)
+/// Paddle Product ID for Recall.OS (to be updated after Paddle approval)
 const PADDLE_PRODUCT_ID: u64 = 0; // TODO: Replace with actual Paddle product ID
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -177,7 +177,7 @@ pub async fn activate_license(
     // Verify this is for our product
     if let Some(ref meta) = body.meta {
         if meta.product_id != PADDLE_PRODUCT_ID {
-            return Err(RecallError::Other("This license key is not valid for RECALL.OS".to_string()));
+            return Err(RecallError::Other("This license key is not valid for Recall.OS".to_string()));
         }
     }
 
@@ -359,7 +359,7 @@ fn get_instance_id() -> String {
     // Try to get machine-specific ID
     if let Ok(hostname) = hostname::get() {
         if let Some(name) = hostname.to_str() {
-            return format!("RECALL-{}", name);
+            return format!("Recall-{}", name);
         }
     }
 
@@ -369,5 +369,5 @@ fn get_instance_id() -> String {
         .duration_since(UNIX_EPOCH)
         .unwrap_or_default()
         .as_secs();
-    format!("RECALL-{}", timestamp)
+    format!("Recall-{}", timestamp)
 }

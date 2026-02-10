@@ -1,6 +1,6 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "RECALL.OS",
+  "productName": "Recall.OS",
   "version": "1.0.5",
   "identifier": "com.recallos.app",
   "build": {
@@ -14,7 +14,7 @@
     "windows": [
       {
         "label": "main",
-        "title": "RECALL.OS",
+        "title": "Recall.OS",
         "width": 1400,
         "height": 900,
         "minWidth": 800,
@@ -54,7 +54,7 @@
     ],
     "publisher": "Project Intuitus",
     "shortDescription": "AI-powered document memory and search",
-    "longDescription": "RECALL.OS is a local-first AI assistant that indexes your documents, videos, and screenshots for intelligent search and question answering.",
+    "longDescription": "Recall.OS is a local-first AI assistant that indexes your documents, videos, and screenshots for intelligent search and question answering.",
     "copyright": "Copyright 2024-2025 Project Intuitus",
     "category": "Productivity",
     "windows": {
